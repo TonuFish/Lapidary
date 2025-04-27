@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lapidary.GemBuilder", "src\Lapidary.GemBuilder\Lapidary.GemBuilder.csproj", "{445ED313-5C8D-44F1-A16F-230201900FAC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C3CABEF6-6C5C-415B-8B30-281A9B9C6DF0}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lapidary.Samples", "samples\Lapidary.Samples\Lapidary.Samples.csproj", "{CF320B03-03C7-42EE-8D54-C61304C9E814}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{445ED313-5C8D-44F1-A16F-230201900FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{445ED313-5C8D-44F1-A16F-230201900FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{445ED313-5C8D-44F1-A16F-230201900FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{445ED313-5C8D-44F1-A16F-230201900FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF320B03-03C7-42EE-8D54-C61304C9E814}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF320B03-03C7-42EE-8D54-C61304C9E814}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF320B03-03C7-42EE-8D54-C61304C9E814}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF320B03-03C7-42EE-8D54-C61304C9E814}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7CE52328-DD09-4558-9C2B-9D8865EF3CC4}
+	EndGlobalSection
+EndGlobal
