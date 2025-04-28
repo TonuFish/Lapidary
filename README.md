@@ -42,7 +42,7 @@ In theory yes, back to version 3.3 for the moment. While 3.7 saw significant imp
 
 public GemObject BasicUsage()
 {
-	var twoObject = context.Execute("1 + 1"u8);
+	var twoObject = context.PerformSmalltalkRaw("1 + 1"u8);
 	var numberTwo = twoObject.GetNumber<int>();
 	
 	var twoStringObject = twoObject.Perform("printString"u8);
