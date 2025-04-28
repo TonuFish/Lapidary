@@ -376,7 +376,7 @@ public readonly ref partial struct GemObject : IEquatable<GemObject>
 			{
 				return ReservedOops.OOP_NIL;
 			}
-			return ConvertArgument2_Class(Unsafe.As<TArg, object>(ref argument));
+			return ConvertArgumentReferenceOrBox(Unsafe.As<TArg, object>(ref argument));
 		}
 
 		return ThrowHelper.GenericExceptionToDetailLater<Oop>();
@@ -404,16 +404,16 @@ public readonly ref partial struct GemObject : IEquatable<GemObject>
 			return obj.Oop;
 		}
 
-		return ConvertArgument2_Class(argument);
+		return ConvertArgumentReferenceOrBox(argument);
 	}
 
-	private readonly Oop ConvertArgument2_Class(object argument)
+	private readonly Oop ConvertArgumentReferenceOrBox(object argument)
 	{
 		var type = argument.GetType();
 
 		if (argument.GetType().IsClass)
 		{
-			// We are known to be not null and neither string or PersistentGemObject - The only handled classes
+			// Callers guarantee supported classes have already been handled (string and PersistentGemObject)
 			return ThrowHelper.GenericExceptionToDetailLater<Oop>();
 		}
 		else if (type == typeof(int))
