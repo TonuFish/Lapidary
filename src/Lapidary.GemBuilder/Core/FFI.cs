@@ -1,6 +1,6 @@
 ﻿namespace Lapidary.GemBuilder.Core;
 
-internal static unsafe class FFI
+internal static class FFI
 {
     public static bool AbortTransaction(GemBuilderSession session)
     {
@@ -58,7 +58,7 @@ internal static unsafe class FFI
         return true;
     }
 
-    public static bool ContinueProcessAfterException(GemBuilderSession session, Oop process)
+    public static unsafe bool ContinueProcessAfterException(GemBuilderSession session, Oop process)
     {
         GciErrSType error = new();
 
@@ -79,7 +79,7 @@ internal static unsafe class FFI
         return true;
     }
 
-    public static ReadOnlyMemory<byte>? Encrypt(ReadOnlySpan<byte> clearText)
+    public static unsafe ReadOnlyMemory<byte>? Encrypt(ReadOnlySpan<byte> clearText)
     {
         // TODO: Clean and simplify the little experiment.
 
@@ -231,17 +231,17 @@ internal static unsafe class FFI
     public static double GetFloat(GemBuilderSession session, Oop root)
     {
         GciErrSType error = new();
-        Unsafe.SkipInit(out double @double);
+        Unsafe.SkipInit(out double num);
 
         // Should only return false if `root` isn't a SmallDouble/Float
-        var readSuccessful = Methods.GciTsOopToDouble(session.SessionId, root, ref @double, ref error);
+        var readSuccessful = Methods.GciTsOopToDouble(session.SessionId, root, ref num, ref error);
         if (readSuccessful == 0)
         {
             session.AddError(ref error);
             return 0D;
         }
 
-        return @double;
+        return num;
     }
 
     public static ReadOnlySpan<byte> GetGemBuilderVersion(Span<byte> buffer)
@@ -253,17 +253,17 @@ internal static unsafe class FFI
     public static long GetLargeInteger(GemBuilderSession session, Oop root)
     {
         GciErrSType error = new();
-        Unsafe.SkipInit(out long @long);
+        Unsafe.SkipInit(out long num);
 
         // Should only return false if the number exceeds the bounds of i64  (2^63-1, 2^-63)
-        var readSuccessful = Methods.GciTsOopToI64(session.SessionId, root, ref @long, ref error);
+        var readSuccessful = Methods.GciTsOopToI64(session.SessionId, root, ref num, ref error);
         if (readSuccessful == 0)
         {
             session.AddError(ref error);
             return 0L;
         }
 
-        return @long;
+        return num;
     }
 
     public static Oop GetObjectClass(GemBuilderSession session, Oop root)
@@ -322,7 +322,7 @@ internal static unsafe class FFI
         if (bytesWritten == -1)
         {
             session.AddError(ref error);
-            return ReadOnlySpan<byte>.Empty;
+            return [];
         }
 
         return buffer[..(int)bytesWritten];
@@ -338,7 +338,7 @@ internal static unsafe class FFI
         if (bytesWritten == -1)
         {
             session.AddError(ref error);
-            return ReadOnlySpan<byte>.Empty;
+            return [];
         }
 
         return buffer[..(int)bytesWritten];
@@ -444,7 +444,7 @@ internal static unsafe class FFI
         return true;
     }
 
-    public static bool LoginX509(
+    public static unsafe bool LoginX509(
         ReadOnlySpan<byte> netldiHostOrIp,
         ReadOnlySpan<byte> netldiNameOrPort,
         ReadOnlySpan<byte> privateKey,
@@ -509,11 +509,11 @@ internal static unsafe class FFI
         }
     }
 
-    public static Oop NewFloat(GemBuilderSession session, double @double)
+    public static Oop NewFloat(GemBuilderSession session, double num)
     {
         GciErrSType error = new();
 
-        var floatOop = Methods.GciTsDoubleToOop(session.SessionId, @double, ref error);
+        var floatOop = Methods.GciTsDoubleToOop(session.SessionId, num, ref error);
         if (floatOop == ReservedOops.OOP_ILLEGAL)
         {
             session.AddError(ref error);
@@ -523,11 +523,11 @@ internal static unsafe class FFI
         return floatOop;
     }
 
-    public static Oop NewLargeInteger(GemBuilderSession session, long @long)
+    public static Oop NewLargeInteger(GemBuilderSession session, long num)
     {
         GciErrSType error = new();
 
-        var longOop = Methods.GciTsI64ToOop(session.SessionId, @long, ref error);
+        var longOop = Methods.GciTsI64ToOop(session.SessionId, num, ref error);
         if (longOop == ReservedOops.OOP_ILLEGAL)
         {
             session.AddError(ref error);
@@ -619,7 +619,7 @@ internal static unsafe class FFI
         }
     }
 
-    public static bool TryGetObjectInfo(GemBuilderSession session, Oop root, out GciTsObjInfo objectInfo)
+    public static unsafe bool TryGetObjectInfo(GemBuilderSession session, Oop root, out GciTsObjInfo objectInfo)
     {
         GciErrSType error = new();
         GciTsObjInfo localObjInfo = new();
@@ -638,7 +638,7 @@ internal static unsafe class FFI
         return true;
     }
 
-    public static bool TryGetObjectInfoWithStringBuffer(
+    public static unsafe bool TryGetObjectInfoWithStringBuffer(
         GemBuilderSession session,
         Oop root,
         out GciTsObjInfo objectInfo,
@@ -666,7 +666,7 @@ internal static unsafe class FFI
         {
             session.AddError(ref error);
             objectInfo = default;
-            stringBuffer = ReadOnlySpan<byte>.Empty;
+            stringBuffer = [];
             return false;
         }
 
@@ -678,11 +678,11 @@ internal static unsafe class FFI
         {
             stringBuffer = bytesWritten < buffer.Length
                 ? (ReadOnlySpan<byte>)buffer[..(int)bytesWritten]
-                : ReadOnlySpan<byte>.Empty;
+                : [];
         }
         else
         {
-            stringBuffer = ReadOnlySpan<byte>.Empty;
+            stringBuffer = [];
         }
 
         return true;

@@ -3,7 +3,7 @@
 /// <summary>
 /// gcioop.ht
 /// </summary>
-internal unsafe static class ReservedOops
+internal static class ReservedOops
 {
     // TODO: Review the gcioop.ht file for 3.7 properly... Is actually quite a significant upgrade
     // TODO: Consider type for these, definitely shouldn't be oop for all of them

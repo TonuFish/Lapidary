@@ -1,7 +1,7 @@
 ﻿namespace Lapidary.GemBuilder.Definitions;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
-internal unsafe ref struct GciTsObjInfo
+internal ref struct GciTsObjInfo
 {
 	internal OopType objId;
 

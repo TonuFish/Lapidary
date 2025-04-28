@@ -2,25 +2,25 @@
 
 internal static class SmallPrimitiveExtensions
 {
-    public static Oop ToGemStoneOop(this int @int)
+    public static Oop ToGemStoneOop(this int num)
     {
-        return (((Oop)@int) << 3) | ReservedOops.OOP_TAG_SMALLINT;
+        return (((Oop)num) << 3) | ReservedOops.OOP_TAG_SMALLINT;
     }
 
-    public static Oop ToGemStoneOop(this short @short)
+    public static Oop ToGemStoneOop(this short num)
     {
-        return (((Oop)@short) << 3) | ReservedOops.OOP_TAG_SMALLINT;
+        return (((Oop)num) << 3) | ReservedOops.OOP_TAG_SMALLINT;
     }
 
-    public static Oop? ToGemStoneOop(this long @long)
+    public static Oop? ToGemStoneOop(this long num)
     {
-        if (@long is < 0x8F_FF_FF_FFL or > 0x0F_FF_FF_FF_FF_FF_FF_FFL)
+        if (num is < 0x8F_FF_FF_FFL or > 0x0F_FF_FF_FF_FF_FF_FF_FFL)
         {
             // Range -2^60 < x < (2^60)-1 ; Requires NewLargeInteger outside of range
             return null;
         }
 
-        return (((Oop)@long) << 3) | ReservedOops.OOP_TAG_SMALLINT;
+        return (((Oop)num) << 3) | ReservedOops.OOP_TAG_SMALLINT;
     }
 
     public static long FromGemStoneOop(this Oop oop)
