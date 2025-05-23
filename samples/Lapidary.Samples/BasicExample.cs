@@ -19,7 +19,13 @@ public static class BasicExample
 		// Configure your database.
 		var manager = host.Services.GetRequiredService<ILapidaryManagementService>();
 
-		DatabaseConnectionCredentials dbcc = new(gemService: "", stoneName: "")
+		const string serverAddress = "localhost";
+		const string netLdiPort = "50377";
+		const string databaseName = "gs64stone";
+
+		DatabaseConnectionCredentials dbcc = new(
+			gemService: $"!tcp@{serverAddress}#netldi:{netLdiPort}#task!gemnetobject",
+			stoneName: $"!@{serverAddress}!{databaseName}")
 		{
 			HostPassword = "",
 			HostUserId = "",
@@ -29,7 +35,7 @@ public static class BasicExample
 		manager.ConfigureDatabase(dbid, dbcc);
 
 		// Configure your persistent session.
-		var encryptedCredentials = manager.EncryptCredentials(new("SystemUser", "swordfish"));
+		var encryptedCredentials = manager.EncryptCredentials(new("DataCurator", "swordfish"));
 		var userSession = manager.LoginEncrypted(dbid, encryptedCredentials);
 
 		// Retrieve your session.
@@ -37,12 +43,21 @@ public static class BasicExample
 		var context = factory.GetContext(userSession);
 
 		// User your connection.
-		var aObject = context.PerformSmalltalkRaw("a"u8);
-		var bObject = context.PerformSmalltalkRaw("b"u8);
-		var result = aObject.Perform("something"u8, bObject);
+
+		// Look up DateTime class
+		// Call now on it
+		// Do it raw
+		// Compare they're equal
+
+		// Add year and days in year together
+		// Print results
+
+		var aObject = context.PerformSmalltalkRaw("72"u8);
+		var bObject = context.PerformSmalltalkRaw("43"u8);
+		var result = aObject.Perform("+"u8, bObject);
 
 		// Read some objects.
-		var resultAsText = result.GetString();
+		var resultAsText = result.Perform("printString"u8).GetString();
 		var resultAsNumber = result.GetNumber<int>();
 		var resultAsDateTime = result.GetDateTime();
 

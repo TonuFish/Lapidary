@@ -319,31 +319,6 @@ public readonly ref partial struct GemObject : IEquatable<GemObject>
 		{
 			return Unsafe.As<TArg, GemObject>(ref argument).Oop;
 		}
-		else if (typeof(TArg) == typeof(PersistentGemObject))
-		{
-			return Unsafe.As<TArg, PersistentGemObject>(ref argument).Oop;
-		}
-		else if (typeof(TArg) == typeof(string))
-		{
-			var text = Unsafe.As<TArg, string>(ref argument);
-
-			scoped Span<byte> unicodeBytes;
-			if (text is not null)
-			{
-				// TODO: This always sends as double byte
-				var unicodeByteCount = Encoding.Unicode.GetByteCount(text);
-				// TODO: Stackalloc or rent strategy
-				unicodeBytes = stackalloc byte[unicodeByteCount];
-				Encoding.Unicode.GetBytes(text, unicodeBytes);
-			}
-			else
-			{
-				unicodeBytes = Span<byte>.Empty;
-			}
-
-			var unicodeSpan = MemoryMarshal.Cast<byte, ushort>(unicodeBytes);
-			return FFI.NewString(Session, (ReadOnlySpan<ushort>)unicodeSpan);
-		}
 		else if (typeof(TArg) == typeof(int))
 		{
 			return Unsafe.As<TArg, int>(ref argument).ToGemStoneOop();
@@ -370,13 +345,12 @@ public readonly ref partial struct GemObject : IEquatable<GemObject>
 			var num = (double)Unsafe.As<TArg, float>(ref argument);
 			return FFI.NewFloat(Session, num);
 		}
+		// TODO: Measure effect of string and persistentGO test here - Very likely worth to re-introduce
 		else if (typeof(TArg).IsClass)
 		{
-			if (Unsafe.IsNullRef(ref argument))
-			{
-				return ReservedOops.OOP_NIL;
-			}
-			return ConvertArgumentReferenceOrBox(Unsafe.As<TArg, object>(ref argument));
+			return Unsafe.IsNullRef(in argument)
+				? ReservedOops.OOP_NIL
+				: ConvertArgumentNotNullReferenceOrBox(Unsafe.As<TArg, object>(ref argument));
 		}
 
 		return ThrowHelper.GenericExceptionToDetailLater<Oop>();
@@ -384,37 +358,16 @@ public readonly ref partial struct GemObject : IEquatable<GemObject>
 
 	private readonly Oop ConvertArgumentFromObject(object argument)
 	{
-		if (argument is null)
-		{
-			return ReservedOops.OOP_NIL;
-		}
-		else if (argument is string text)
-		{
-			// TODO: This always sends as double byte
-			var unicodeByteCount = Encoding.Unicode.GetByteCount(text);
-			// TODO: Stackalloc or rent strategy
-			Span<byte> unicodeBytes = stackalloc byte[unicodeByteCount];
-			Encoding.Unicode.GetBytes(text, unicodeBytes);
-
-			var unicodeSpan = MemoryMarshal.Cast<byte, ushort>(unicodeBytes);
-			return FFI.NewString(Session, (ReadOnlySpan<ushort>)unicodeSpan);
-		}
-		else if (argument is PersistentGemObject obj)
-		{
-			return obj.Oop;
-		}
-
-		return ConvertArgumentReferenceOrBox(argument);
+		return (argument is null) ? ReservedOops.OOP_NIL : ConvertArgumentNotNullReferenceOrBox(argument);
 	}
 
-	private readonly Oop ConvertArgumentReferenceOrBox(object argument)
+	private readonly Oop ConvertArgumentNotNullReferenceOrBox(object argument)
 	{
 		var type = argument.GetType();
 
-		if (argument.GetType().IsClass)
+		if (type.IsClass)
 		{
-			// Callers guarantee supported classes have already been handled (string and PersistentGemObject)
-			return ThrowHelper.GenericExceptionToDetailLater<Oop>();
+			return ConvertArgumentReference(argument);
 		}
 		else if (type == typeof(int))
 		{
@@ -442,10 +395,31 @@ public readonly ref partial struct GemObject : IEquatable<GemObject>
 			var num = (double)(float)argument;
 			return FFI.NewFloat(Session, num);
 		}
-		else
+
+		return ThrowHelper.GenericExceptionToDetailLater<Oop>();
+	}
+
+	private readonly Oop ConvertArgumentReference(object argument)
+	{
+		// This method would be local to ConvertArgumentNotNullReferenceOrBox if this wasn't a struct.
+
+		if (argument is string text)
 		{
-			return ThrowHelper.GenericExceptionToDetailLater<Oop>();
+			// TODO: This always sends as double byte
+			var unicodeByteCount = Encoding.Unicode.GetByteCount(text);
+			// TODO: Stackalloc or rent strategy
+			Span<byte> unicodeBytes = stackalloc byte[unicodeByteCount];
+			Encoding.Unicode.GetBytes(text, unicodeBytes);
+
+			var unicodeSpan = MemoryMarshal.Cast<byte, ushort>(unicodeBytes);
+			return FFI.NewString(Session, (ReadOnlySpan<ushort>)unicodeSpan);
 		}
+		else if (argument is PersistentGemObject obj)
+		{
+			return obj.Oop;
+		}
+
+		return ThrowHelper.GenericExceptionToDetailLater<Oop>();
 	}
 
 	#endregion Foreign Perform
