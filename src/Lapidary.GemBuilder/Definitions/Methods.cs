@@ -364,12 +364,14 @@ internal unsafe static partial class Methods
 	/// There is no terminator zero included in *dest .
 	/// </summary>
 	/// <remarks>
-	/// EXTERN_GCI_DEC(int64) GciTsFetchChars(GciSession sess,
-	/// OopType theObject,
+	/// EXTERN_GCI_DEC(int64) GciTsFetchUtf8Bytes(GciSession sess,
+	/// OopType aString,
 	/// int64 startIndex,
-	/// char* cString,
-	/// int64 maxSize,
-	/// GciErrSType* err) GCI_WEAK;
+	/// ByteType *dest,
+	/// int64 bufSize,
+	/// OopType *utf8String,
+	/// GciErrSType* err,
+	/// int flags = 0) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial int64 GciTsFetchUtf8Bytes(
@@ -398,10 +400,10 @@ internal unsafe static partial class Methods
 	/// EXTERN_GCI_DEC(BoolType) GciTsStoreBytes(GciSession sess,
 	/// OopType theObject,
 	/// int64 startIndex,
-	/// ByteType* theBytes,
+	/// ByteType *theBytes,
 	/// int64 numBytes,
 	/// OopType ofClass,
-	/// GciErrSType* err) GCI_WEAK;
+	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial BoolType GciTsStoreBytes(
@@ -440,9 +442,73 @@ internal unsafe static partial class Methods
 		ref GciErrSType err);
 
 	/// <summary>
-	/// GciTsStoreOops
+	///  GciTsFetchNamedOops
 	///
-	/// startIndex must be >= 1 .
+	///  Returns -1 if an error returned in *err , otherwise returns the
+	///  number of oops returned in *theOops , which will be <= numOops .
+	///  startIndex is one based (Smalltalk style)
+	///  startIndex must be >= 1 .
+	///  startIndex - 1 + numOops  must be <=  ( theObject class instSize )
+	///  numOops must be >= 0 . theOops must be non-NULL if numOops > 0.
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(int) GciTsFetchNamedOops(GciSession sess,
+	/// OopType theObject,
+	/// int64 startIndex,
+	/// OopType *theOops,
+	/// int numOops,
+	/// GciErrSType *err) GCI_WEAK;
+	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial int GciTsFetchNamedOops(
+		GciSession sess,
+		OopType theObject,
+		int64 startIndex,
+		Span<OopType> theOops,
+		int numOops,
+		ref GciErrSType err);
+
+	/// <summary>
+	///  GciTsFetchVaryingOops
+	///
+	///  Returns -1 if an error returned in *err , otherwise returns the
+	///  number of oops returned in *theOops , which will be <= numOops .
+	///  startIndex is one based (Smalltalk style)
+	///  startIndex must be >= 1 .
+	///  theObject must be
+	///  numOops must be >= 0 . theOops must be non-NULL if numOops > 0.
+	///  Returns elements of an Nsc , as per    IdentityBag >> _at:
+	///  or varying elements of an Array, as per   Array >> at:   .
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(int) GciTsFetchVaryingOops(GciSession sess,
+	/// OopType theObject,
+	/// int64 startIndex,
+	/// OopType *theOops,
+	/// int numOops,
+	/// GciErrSType *err) GCI_WEAK;
+	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial int GciTsFetchVaryingOops(
+		GciSession sess,
+		OopType theObject,
+		int64 startIndex,
+		Span<OopType> theOops,
+		int numOops,
+		ref GciErrSType err);
+
+	/// <summary>
+	///  GciTsStoreOops
+	///
+	///  Returns FALSE if an error was returned in *err .
+	///  startIndex must be >= 1 .
+	///  If startIndex is within the named instVars of an object, stores into named instVars.
+	///  If the oops to store extend beyond named instVars, stores into varying
+	///  instvars of an oop format object, such as an Array .
+	///  If overlay==TRUE,  theOops may contain elements with value OOP_ILLEGAL
+	///  corresponding to instVars whose state will not be changed.
+	///  Attempting to store into varying intVars of an nsc  ( theObject isKindOf: IdentityBag )
+	///  will retun an error .
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(BoolType) GciTsStoreOops(GciSession sess,
@@ -464,11 +530,85 @@ internal unsafe static partial class Methods
 		BoolType overlay = 0);
 
 	/// <summary>
+	///  GciTsStoreNamedOops
+	///  Returns FALSE if an error was returned in *err .
+	///  startIndex must be >= 1 .
+	///  startIndex - 1 + numOops  must be <=  ( theObject class instSize )
+	///  If overlay==TRUE,  theOops may contain elements with value OOP_ILLEGAL
+	///  corresponding to instVars whose state will not be changed.
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(BoolType) GciTsStoreNamedOops(GciSession sess,
+	/// OopType theObject,
+	/// int64 startIndex,
+	/// const OopType *theOops,
+	/// int numOops,
+	/// GciErrSType *err,
+	/// BoolType overlay = FALSE) GCI_WEAK;
+	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial BoolType GciTsStoreNamedOops(
+		GciSession sess,
+		OopType theObject,
+		int64 startIndex,
+		/* const */ ReadOnlySpan<OopType> theOops,
+		int numOops,
+		ref GciErrSType err,
+		BoolType overlay = 0);
+
+	/// <summary>
+	///  GciTsStoreIdxOops
+	///  Returns FALSE if an error was returned in *err .
+	///  startIndex must be >= 1 .
+	///  Stores into varying instVars of an oop format object, as per Array >> at:put:
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(BoolType) GciTsStoreIdxOops(GciSession sess,
+	/// OopType theObject,
+	/// int64 startIndex,
+	/// const OopType *theOops,
+	/// int numOops,
+	/// GciErrSType *err) GCI_WEAK;
+	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial BoolType GciTsStoreIdxOops(
+		GciSession sess,
+		OopType theObject,
+		int64 startIndex,
+		/* const */ ReadOnlySpan<OopType> theOops,
+		int numOops,
+		ref GciErrSType err);
+
+	/// <summary>
+	///  GciTsAddOopsToNsc
+	///
+	///  Returns FALSE if an error returned in *err,
+	///  (theObject isKindOf: IdentityBag) must be true
+	///  Adds objects to theObject, as per  IdentityBag >> addAll:
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(BoolType) GciTsAddOopsToNsc(GciSession sess,
+	/// OopType theObject,
+	/// const OopType *theOops,
+	/// int numOops,
+	/// GciErrSType *err) GCI_WEAK;
+	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial BoolType GciTsAddOopsToNsc(
+		GciSession sess,
+		OopType theObject,
+		/* const */ ReadOnlySpan<OopType> theOops,
+		int numOops,
+		ref GciErrSType err);
+
+	/// <summary>
 	/// GciTsRemoveOopsFromNsc
 	///
 	/// Returns -1 if an error returned in *err,
 	/// 0 if any element of theOops was not present in theNsc,
 	/// 1 if all elements of theOops were present in theNsc
+	/// (theNsc isKindOf: IdentityBag) must be true .
+	/// Removes objects from theNsc per   IdentityBag >> removeAll:
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(int) GciTsRemoveOopsFromNsc(GciSession sess,
@@ -513,6 +653,44 @@ internal unsafe static partial class Methods
 		OopType objId,
 		BoolType addToExportSet,
 		ref GciTsObjInfo result,
+		ByteType* buffer,
+		size_t bufSize,
+		ref GciErrSType err);
+
+	// TODO: GciTsGbjInfo struct
+
+	/// <summary>
+	/// GciTsFetchGbjInfo
+	///  Function result is >= 0 for success or
+	///  -2 object does not exist ,
+	///  -1 if an error other than read authorization failure was returned in *err .
+	///  client side handling of special objects as before.
+	///  addToExportSet has effect only if function result is 1
+	///  If buffer not NULL, then up to bufSize bytes of the body of the object
+	///  are returned in *buffer, and function result is the number of instVars returned.
+	///  If buffer == NULL then function result is 0 for success or -1 for error.
+	///  If read authorization is denied for objId, then result->access == 0 ,
+	///  the rest of *result other than result->objId is zero , and function result is zero.
+	///
+	///  GciTsGbjInfo includes additional information about the class of the object,
+	///  to allow faster handling of varying kinds of results.
+	///  See extraBits field of GciTsGbjInfo .
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(int64) GciTsFetchGbjInfo(GciSession sess,
+	/// OopType objId,
+	/// BoolType addToExportSet,
+	/// GciTsGbjInfo *result,
+	/// ByteType *buffer,
+	/// size_t bufSize,
+	/// GciErrSType *err) GCI_WEAK;
+	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial int64 GciTsFetchGbjInfo(
+		GciSession sess,
+		OopType objId,
+		BoolType addToExportSet,
+		ref GciTsGbjInfo result,
 		ByteType* buffer,
 		size_t bufSize,
 		ref GciErrSType err);
@@ -562,7 +740,7 @@ internal unsafe static partial class Methods
 	/// OopType obj,
 	/// GciErrSType* err) GCI_WEAK;
 	/// </remarks>
-	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	[LibraryImport(Version.GciTsDLL), cDefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial OopType GciTsFetchClass(
 		GciSession sess,
 		OopType obj,
@@ -705,7 +883,7 @@ internal unsafe static partial class Methods
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(OopType) GciTsNewString_(GciSession sess,
-	/// const char* cString,
+	/// const char *cString,
 	/// size_t nBytes,
 	/// GciErrSType* err) GCI_WEAK;
 	/// </remarks>
@@ -717,6 +895,28 @@ internal unsafe static partial class Methods
 		ref GciErrSType err);
 
 	/// <summary>
+	/// GciTsNewStringFromUtf16
+	/// \*words  must be UTF16 encoded data
+	/// returns OOP_ILLEGAL if an error occured
+	/// unicodeKind 0   create a String, DoubleByteString or QuadByteString
+	///             1   create a Unicode7 , Unicode16 or Unicode32
+	///            -1   create a string or unicode string per (Globals at:#StringConfiguration)
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(OopType) GciTsNewStringFromUtf16(GciSession sess,
+	/// ushort *words,
+	/// int64 nWords,
+	/// int unicodeKind,
+	/// GciErrSType *err) GCI_WEAK;
+	/// </remarks>
+	public static OopType GciTsNewStringFromUtf16(
+		GciSession sess,
+		Span<char> words, // TODO: double check this
+		int64 nWords,
+		int unicodeKind,
+		ref GciErrSType err);
+
+	/// <summary>
 	/// GciTsNewString
 	/// Create a String object from a null-terminated C string.
 	/// Returns an instance of String,
@@ -724,7 +924,7 @@ internal unsafe static partial class Methods
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(OopType) GciTsNewString(GciSession sess,
-	/// const char* cString,
+	/// const char *cString,
 	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
@@ -741,7 +941,7 @@ internal unsafe static partial class Methods
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(OopType) GciTsNewSymbol(GciSession sess,
-	/// const char* cString,
+	/// const char *cString,
 	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
@@ -849,7 +1049,7 @@ internal unsafe static partial class Methods
 	///
 	/// destSize is the size of the buffer *dest in shorts .
 	///
-	/// *dest will be filled with UTF-16 encoded Characters .
+	/// \*dest will be filled with UTF-16 encoded Characters .
 	///
 	/// Returns -1 if an error was returned in *err ,
 	/// otherwise returns the number of codeunits (number of ushorts)
@@ -883,7 +1083,7 @@ internal unsafe static partial class Methods
 	/// class of anObject must be a identical to or a subclass of
 	/// String, DoubleByteString, or Unicode32 or Utf8 .
 	///
-	/// *dest will be filled with UTF-8 encoded Characters .
+	/// \*dest will be filled with UTF-8 encoded Characters .
 	///
 	/// Returns -1 if an error was returned in *err , otherwise
 	/// returns the number of bytes stored starting at *dest,
@@ -942,7 +1142,7 @@ internal unsafe static partial class Methods
 	/// OopType receiver,
 	/// OopType aSymbol,
 	/// const char* selectorStr,
-	/// const OopType* args,
+	/// const OopType *args,
 	/// int numArgs,
 	/// int flags /* per GCI_PERFORM_FLAG* in gcicmn.ht */,
 	/// ushort environmentId /* normally zero*/,
@@ -1018,7 +1218,7 @@ internal unsafe static partial class Methods
 	/// EXTERN_GCI_DEC(ssize_t) GciTsPerformFetchBytes(GciSession sess,
 	/// OopType receiver,
 	/// const char* selectorStr,
-	/// const OopType* args,
+	/// const OopType *args,
 	/// int numArgs,
 	/// ByteType *result,
 	/// ssize_t maxResultSize,
@@ -1031,8 +1231,37 @@ internal unsafe static partial class Methods
 		/* const */ ReadOnlySpan<byte> selectorStr,
 		/* const */ ReadOnlySpan<OopType> args,
 		int numArgs,
-		Span<ByteType> result,
+		Span<ByteType> result, // TODO: Wrapper must zero the alloc
 		ssize_t maxResultSize,
+		ref GciErrSType err);
+
+	/// <summary>
+	///  GciTsPerformFetchBytes
+	///
+	///  Do a perform per  receiver, selector, args, num args.
+	///    the result of which is expected to be an oop format object.
+	///  Return up to maxResultSize of the instVars of the result of the perform.
+	///  The result of the perform is is not added to the export set nor is it returned.
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(int) GciTsPerformFetchOops(GciSession sess,
+	/// OopType receiver,
+	/// const char* selectorStr,
+	/// const OopType *args,
+	/// int numArgs,
+	/// OopType *result,
+	/// int maxResultSize,
+	/// GciErrSType *err) GCI_WEAK;
+	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial int GciTsPerformFetchOops(
+		GciSession sess,
+		OopType receiver,
+		/* const */ ReadOnlySpan<byte> selectorStr,
+		/* const */ ReadOnlySpan<OopType> args,
+		int numArgs,
+		Span<OopType> result, // TODO: Wrapper must zero the alloc
+		int maxResultSize,
 		ref GciErrSType err);
 
 	/// <summary>
@@ -1104,6 +1333,7 @@ internal unsafe static partial class Methods
 	///  1 - result or error is ready, call GciTsNbResult  to get the result or error .
 	///  0 - result is not ready
 	/// -1 - error, (invalid session, no NB call in progress, peer disconnected), details in gciErr.
+	///
 	///	timeoutMs values:
 	/// 0 - do not block, return immediatly
 	/// -1 - block forever until the Nb call finishes or an error occurs.
@@ -1462,7 +1692,7 @@ internal unsafe static partial class Methods
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(int) GciTsFetchTraversal(GciSession sess,
-	/// const OopType* theOops,
+	/// const OopType *theOops,
 	/// int numOops,
 	/// GciClampedTravArgsSType *ctArgs,
 	/// GciErrSType* err) GCI_WEAK;
@@ -1502,8 +1732,8 @@ internal unsafe static partial class Methods
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(int) GciTsMoreTraversal(GciSession sess,
-	/// GciTravBufType* travBuff,
-	/// GciErrSType* err) GCI_WEAK;
+	/// GciTravBufType *travBuff,
+	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial int GciTsMoreTraversal(
@@ -1578,7 +1808,7 @@ internal unsafe static partial class Methods
 	/// attempt to commit or prior to the abort, respectively.
 	/// </summary>
 	/// <remarks>
-	/// EXTERN_GCI_DEC(BoolType) GciTsDirtyObjsInit(GciSession sess, GciErrSType* err)  GCI_WEAK;
+	/// EXTERN_GCI_DEC(BoolType) GciTsDirtyObjsInit(GciSession sess, GciErrSType *err)  GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial BoolType GciTsDirtyObjsInit(GciSession sess, ref GciErrSType err);
@@ -1606,7 +1836,7 @@ internal unsafe static partial class Methods
 	/// <remarks>
 	/// EXTERN_GCI_DEC(OopType) GciTsDoubleToOop(GciSession sess,
 	/// double aDouble,
-	/// GciErrSType* err) GCI_WEAK;
+	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial OopType GciTsDoubleToOop(
@@ -1666,7 +1896,7 @@ internal unsafe static partial class Methods
 	/// <remarks>
 	/// EXTERN_GCI_DEC(OopType) GciTsI64ToOop(GciSession sess,
 	/// int64 arg,
-	/// GciErrSType* err) GCI_WEAK;
+	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial OopType GciTsI64ToOop(
@@ -1686,8 +1916,8 @@ internal unsafe static partial class Methods
 	/// <remarks>
 	/// EXTERN_GCI_DEC(BoolType) GciTsOopToI64(GciSession sess,
 	/// OopType oop,
-	/// int64* result,
-	/// GciErrSType* err) GCI_WEAK;
+	/// int64 *result,
+	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial BoolType GciTsOopToI64(
@@ -1707,7 +1937,7 @@ internal unsafe static partial class Methods
 	/// <remarks>
 	/// EXTERN_GCI_DEC(BoolType) GciTsBreak(GciSession sess,
 	/// BoolType hard,
-	/// GciErrSType* err) GCI_WEAK;
+	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial BoolType GciTsBreak(
@@ -1732,8 +1962,8 @@ internal unsafe static partial class Methods
 	/// <remarks>
 	/// EXTERN_GCI_DEC(int) GciTsWaitForEvent(GciSession sess,
 	/// int latencyMs,
-	/// GciEventType* evout,
-	/// GciErrSType* err) GCI_WEAK;
+	/// GciEventType *evout,
+	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial int GciTsWaitForEvent(
@@ -1780,11 +2010,77 @@ internal unsafe static partial class Methods
 	/// in the 'Version Management' category.
 	/// </summary>
 	/// <remarks>
-	/// EXTERN_GCI_DEC(uint) GciTsVersion(char* buf,
+	/// EXTERN_GCI_DEC(uint) GciTsVersion(char *buf,
 	/// size_t bufSize) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial uint GciTsVersion(Span<byte> buf, size_t bufSize);
+
+	/// <summary>
+	/// GciTsKeepAliveCount
+	/// for use in testing the libgcits library.  returns number of keep alive bytes
+	/// received by the session, or -1 if an error was returned in *err
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(int64) GciTsKeepAliveCount(GciSession s, GciErrSType *err) GCI_WEAK ;
+	/// </remarks>
+	public static partial int64 GciTsKeepAliveCount(GciSession s, ref GciErrSType err);
+
+	/// <summary>
+	/// GciTsDirtyExportedObjs
+	/// This entry point returns a list of objects which are in the
+	/// ExportedDirtyObjs, i.e. objects in the PureExportSet and whose state
+	/// has been changed by one of the following:
+	///     1.  Smalltalk execution,
+	///     2.  Calls to GciStorePaths, GciSymDictAtObjPut, GciSymDictAtPut,
+	///           GciStrKeyValueDictAtObjPut, GciStrKeyValueDictAtPut
+	///     3.  Any GCI call from within a user action.
+	///     4.  Committed by another transaction if a commit or abort
+	///         was executed.
+	///     5.  Aborted the modified state of a committed object.
+	/// GciTsDirtyObjsInit() must be called once after login before
+	/// GciTsDirtyExportedObjs() can be used.
+	///
+	/// Calls to GciTsStore*  functions do NOT put the modified object into
+	/// the set of dirty objects.  The assumption is that the client does not
+	/// want the dirty set to include modifications that the client has
+	/// explicitly made.  EXCEPTION:  GciStore*, etc, calls from within
+	/// a user action WILL put the modified object into the set of dirty
+	/// objects.
+	///
+	/// The numOops argument is used as both an input and an output parameter.
+	/// On input the value of numOops should be set to the maximum number of
+	/// oops that can be returned in this call, i.e., the size (in oops)
+	/// of the buffer specified by the first argument.  On output the numOops
+	/// argument is set to the number of oops returned in the buffer.
+	///
+	/// The function result indicates whether the operation of returning
+	/// the dirty objects is done.  If not done, i.e. FALSE, it is expected
+	/// that the user will make repeated calls to this function until it
+	/// returns a TRUE to indicate that all of the dirty objects have been
+	/// returned.  If repeated calls are not made, then the unreturned objects
+	/// will persist in the list until the function is next called.
+	///
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(BoolType) GciTsDirtyExportedObjs(GciSession s, OopType theOops[], int *numOops,
+	/// GciErrSType *err) GCI_WEAK ;
+	/// </remarks>
+	public static partial BoolType GciTsDirtyExportedObjs(
+		GciSession s,
+		Span<OopType> theOops,
+		ref int numOops,
+		ref GciErrSType err);
+
+	/// <summary>
+	/// GciTsKeyfilePermissions
+	/// Returns -1 for error, or the uint32 value of keyfilePermissions from the stone process
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(int64)
+	/// GciTsKeyfilePermissions(GciSession s, GciErrSType *err)  GCI_WEAK;
+	/// </remarks>
+	public static partial int64 GciTsKeyfilePermissions(GciSession s, ref GciErrSType err);
 
 	/// <summary>
 	/// GciUtf8To8bit
@@ -1797,7 +2093,7 @@ internal unsafe static partial class Methods
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(BoolType) GciUtf8To8bit(const char* src,
-	/// char* dest,
+	/// char *dest,
 	/// ssize_t destSize) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
@@ -1817,7 +2113,7 @@ internal unsafe static partial class Methods
 	/// <remarks>
 	/// EXTERN_GCI_DEC(ssize_t) GciNextUtf8Character(const char* src,
 	/// size_t len,
-	/// uint* chOut) GCI_WEAK;
+	/// uint *chOut) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial ssize_t GciNextUtf8Character(
@@ -1828,79 +2124,79 @@ internal unsafe static partial class Methods
 	#region Unnecessary or Undocumented
 
 	/*
-    /// <summary>
-    /// GciUnload
-    /// Has no effect
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(void) GciUnload(void) GCI_WEAK;
-    /// </remarks>
-    public static partial void GciUnload();
+	/// <summary>
+	/// GciUnload
+	/// Has no effect
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(void) GciUnload(void) GCI_WEAK;
+	/// </remarks>
+	public static partial void GciUnload();
 
-    /// <summary>
-    /// GciShutdown_
-    /// Has no effect
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(void) GciShutdown() GCI_WEAK;
-    /// </remarks>
-    public static partial void GciShutdown();
+	/// <summary>
+	/// GciShutdown_
+	/// Has no effect
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(void) GciShutdown() GCI_WEAK;
+	/// </remarks>
+	public static partial void GciShutdown();
 
-    /// <summary>
-    /// GciMalloc
-    ///  returns the result of calling malloc
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(void*) GciMalloc(size_t length, int lineNum) GCI_WEAK;
-    /// </remarks>
-    public static partial void* GciMalloc(size_t length, int lineNum);
+	/// <summary>
+	/// GciMalloc
+	/// returns the result of calling malloc
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(void*) GciMalloc(size_t length, int lineNum) GCI_WEAK;
+	/// </remarks>
+	public static partial void* GciMalloc(size_t length, int lineNum);
 
-    /// <summary>
-    /// <b>No documentation.</b>
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(int) GciHostCallDebuggerMsg(const char* msg)  GCI_WEAK;
-    /// </remarks>
-    public static partial int GciHostCallDebuggerMsg(/* const / byte* msg);
+	/// <summary>
+	/// <b>No documentation.</b>
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(int) GciHostCallDebuggerMsg(const char* msg)  GCI_WEAK;
+	/// </remarks>
+	public static partial int GciHostCallDebuggerMsg(/* const / byte* msg);
 
-    /// <summary>
-    /// GciFree
-    ///  returns the result of calling free
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(void) GciFree(void* ptr)  GCI_WEAK;
-    /// </remarks>
-    public static partial void GciFree(void* ptr);
+	/// <summary>
+	/// GciFree
+	///  returns the result of calling free
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(void) GciFree(void* ptr)  GCI_WEAK;
+	/// </remarks>
+	public static partial void GciFree(void* ptr);
 
-    /// <summary>
-    /// <b>No documentation.</b>
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(void) GciTimeStampMsStr(time_t seconds, unsigned short milliSeconds,
-    /// char* result, size_t resultSize) GCI_WEAK;
-    /// </remarks>
-    public static partial void GciTimeStampMsStr(
-        time_t seconds,
-        ushort milliSeconds,
-        char* result,
-        size_t resultSize);
+	/// <summary>
+	/// <b>No documentation.</b>
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(void) GciTimeStampMsStr(time_t seconds, unsigned short milliSeconds,
+	/// char *result, size_t resultSize) GCI_WEAK;
+	/// </remarks>
+	public static partial void GciTimeStampMsStr(
+		time_t seconds,
+		ushort milliSeconds,
+		char* result,
+		size_t resultSize);
 
-    /// <summary>
-    /// <b>No documentation.</b>
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(void) GciHostFtime(time_t* sec, unsigned short* millitm) GCI_WEAK;
-    /// </remarks>
-    public static partial void GciHostFtime(time_t* sec, ushort* millitm);
+	/// <summary>
+	/// <b>No documentation.</b>
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(void) GciHostFtime(time_t *sec, unsigned short *millitm) GCI_WEAK;
+	/// </remarks>
+	public static partial void GciHostFtime(time_t* sec, ushort* millitm);
 
-    /// <summary>
-    /// <b>No documentation.</b>
-    /// </summary>
-    /// <remarks>
-    /// EXTERN_GCI_DEC(void) GciHostMilliSleep(unsigned int milliSeconds)  GCI_WEAK;
-    /// </remarks>
-    public static partial void GciHostMilliSleep(uint milliSeconds);
-    */
+	/// <summary>
+	/// <b>No documentation.</b>
+	/// </summary>
+	/// <remarks>
+	/// EXTERN_GCI_DEC(void) GciHostMilliSleep(unsigned int milliSeconds)  GCI_WEAK;
+	/// </remarks>
+	public static partial void GciHostMilliSleep(uint milliSeconds);
+	*/
 
 	#endregion Unnecessary or Undocumented
 }

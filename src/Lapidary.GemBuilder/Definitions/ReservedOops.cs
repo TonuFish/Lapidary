@@ -37,7 +37,7 @@ internal static class ReservedOops
     public const Oop OOP_NIL = 0x14UL;
     public const Oop OOP_REMOTE_NIL = 0x114UL;
 
-    // additional instances of UndefinedObject used within the VM, in oop.ht 
+    // additional instances of UndefinedObject used within the VM, in oop.ht
 
     public const Oop OOP_FALSE = 0x0CUL;
     public const Oop OOP_TRUE = 0x10CUL;
@@ -172,7 +172,7 @@ internal static class ReservedOops
     public const Oop OOP_CLASS_LOG_ENTRY = 92161UL;/* v1.1 oop  721 */
 
     /* DB conversion note: the following classes exist WITHOUT reserved
-	 *  oops in 3.2 Geode databases.  Oops of the such classes and 
+	 *  oops in 3.2 Geode databases.  Oops of the such classes and
 	 *  references to the classes must be changed by the fullbackup phase
 	 *  of 3.2 to 4.0 database conversion
 	 */
@@ -488,8 +488,8 @@ internal static class ReservedOops
 
     /* added in 3.3 */
     public const Oop OOP_CLASS_SmallFraction = 156161UL;
-    // 29 bit signed numerator, 27bit unsigned denom, 8 bits tag(value 0x2c), 
-    // see lrgint.c and gcisup_ts.c 
+    // 29 bit signed numerator, 27bit unsigned denom, 8 bits tag(value 0x2c),
+    // see lrgint.c and gcisup_ts.c
 
     public const Oop OOP_CLASS_AbstractFraction = 156417UL;
 
@@ -528,8 +528,8 @@ internal static class ReservedOops
 
     /* from 160001, 175 oops left to LAST_EXPORTED_OOP=205057 */
 
-    /* oops OOP_LAST_KERNEL_OOP+256 to OOP_LAST_EXPORTED_OOP(in oop.ht) 
-	 * are available for new kernel classes
+    /* oops OOP_LAST_KERNEL_OOP+256 to OOP_LAST_EXPORTED_OOP(in oop.ht)
+	 * are also available for new kernel classes
 	 */
 
     /* ************************************************************ */
