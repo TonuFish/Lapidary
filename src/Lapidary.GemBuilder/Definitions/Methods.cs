@@ -897,7 +897,7 @@ internal unsafe static partial class Methods
 	/// <summary>
 	/// GciTsNewStringFromUtf16
 	/// \*words  must be UTF16 encoded data
-	/// returns OOP_ILLEGAL if an error occured
+	/// returns OOP_ILLEGAL if an error occurred
 	/// unicodeKind 0   create a String, DoubleByteString or QuadByteString
 	///             1   create a Unicode7 , Unicode16 or Unicode32
 	///            -1   create a string or unicode string per (Globals at:#StringConfiguration)
@@ -1236,12 +1236,12 @@ internal unsafe static partial class Methods
 		ref GciErrSType err);
 
 	/// <summary>
-	///  GciTsPerformFetchBytes
+	///  GciTsPerformFetchOops
 	///
 	///  Do a perform per  receiver, selector, args, num args.
 	///    the result of which is expected to be an oop format object.
 	///  Return up to maxResultSize of the instVars of the result of the perform.
-	///  The result of the perform is is not added to the export set nor is it returned.
+	///  The result of the perform it is not added to the export set nor is it returned.
 	/// </summary>
 	/// <remarks>
 	/// EXTERN_GCI_DEC(int) GciTsPerformFetchOops(GciSession sess,

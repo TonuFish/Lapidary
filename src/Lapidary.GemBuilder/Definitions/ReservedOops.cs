@@ -27,11 +27,24 @@ internal static class ReservedOops
     public const Oop OOP_TAG_SMALLDOUBLE = 0x6UL; /* 2r110  SmallDouble */
     public const Oop OOP_TAG_SPECIAL = 0x4UL; /* 2r100  true,false,nil, Char, JISChar */
 
-    // mask to obtain class field of any special oop for lookup in specialClasses table.
-    public const Oop OOP_SPECIAL_CLASS_MASK = 0xFEUL;
+	public const int OOP_NUM_TAG_BITS = 3; /* number of tag bits on a disk objIDd */
 
+	// mask to obtain class field of any special oop for lookup in specialClasses table.
+	public const Oop OOP_SPECIAL_CLASS_MASK = 0xFEUL;
+
+	public const Oop OOP_POM_TAG_MASK = 0x1UL;
     public const Oop OOP_TAG_SPECIAL_MASK = 0x6UL; /* any special oop */
     public const Oop OOP_RAM_TAG_MASK = 0x7UL; /* OOP_RAM_TAG_MASK must be all ones (no intervening zeros) */
+
+	// mask for class field of specials other than SmallInt or SmallDouble.
+	public const Oop OOP_SPECIAL_ST_CLASS_FIELD_MASK = 0xF8UL; // 2rxxxxx100
+	public const Oop OOP_SPECIAL_CLS_MASK = 0xFFUL; // OOP_RAM_TAG_MASK | OOP_SPECIAL_ST_CLASS_FIELD_MASK
+
+    public const int GCI_MAX_SYMBOL_SIZE = 1024; // maximum number of Characters in a Symbol
+	public const int GCI_MAX_SYMBOL_SIZE_bytes = 4096; // worst case QuadByteSymbol
+
+	public const long MAX_SMALL_INT = 1152921504606846975L;
+	public const long MIN_SMALL_INT = -1152921504606846976L;
 
     public const Oop OOP_ILLEGAL = 0x01UL;
     public const Oop OOP_NIL = 0x14UL;
@@ -43,6 +56,8 @@ internal static class ReservedOops
     public const Oop OOP_TRUE = 0x10CUL;
     public const Oop OOP_ASCII_NUL = 0x1CUL;
     public const Oop OOP_FIRST_JIS_CHAR = 0x24UL;
+
+    // TODO: Check bug 40443 - OOP_MIN_SMALL_INT_6x
 
     /* OOP_NO_CONTEXT is used to tell GCI calls that do a execute from
 	 * a specified context that no context should be used.
@@ -115,11 +130,11 @@ internal static class ReservedOops
     public const Oop OOP_CLASS_OBSOLETE_SYM_KEY_VALUE_DICTIONARY = 80129UL;/* v1.1 oop  627 */
     public const Oop OOP_CLASS_CHARACTER_COLLECTION = 80385UL;/* v1.1 oop  629 */
     public const Oop OOP_CLASS_JAPANESE_STRING = 80641UL;/* v1.1 oop  631 */
-    public const Oop OOP_CLASS_EUC_STRING = 80897UL;/* v1.1 oop  633 */
-    public const Oop OOP_CLASS_INVARIANT_EUC_STRING = 81153UL;/* v1.1 oop  635 */
-    public const Oop OOP_CLASS_EUC_SYMBOL = 81409UL;/* v1.1 oop  637 */
+    public const Oop OOP_CLASS__EUC_STRING = 80897UL;/* v1.1 oop  633 */
+    public const Oop OOP_CLASS_INVARIANT__EUC_STRING = 81153UL;/* v1.1 oop  635 */
+    public const Oop OOP_CLASS__EUC_SYMBOL = 81409UL;/* v1.1 oop  637 */
     public const Oop OOP_CLASS_ABSTRACT_CHARACTER = 81665UL;/* v1.1 oop  639 */
-    public const Oop OOP_CLASS_JIS_CHARACTER = 81921UL;/* v1.1 oop  641 */
+    public const Oop OOP_CLASS__JIS_CHARACTER = 81921UL;/* v1.1 oop  641 */
     /* following added in 3.2 */
     public const Oop OOP_CLASS_CLUSTER_BUCKET = 82177UL;/* v1.1 oop  643 */
     public const Oop OOP_CLASS_CLUSTER_BUCKET_ARRAY = 82433UL;/* v1.1 oop  645 */
@@ -220,7 +235,7 @@ internal static class ReservedOops
     public const Oop OOP_CLASS_oldGSPROCESS = 99841UL;/* v1.1 oop  781 */
     public const Oop OOP_CLASS_GSSTACK_BUFFER = 100097UL;/* v1.1 oop  783 */
 
-    public const Oop OOP_CLASS_CLASS_DEF_INFO = 100353UL;/* v1.1 oop  785 */
+    public const Oop OOP_CLASS_CLASS_DEF_INFO = 100353UL;/* as of Gs64 v3.7.0+ not in base image */
 
     public const Oop OOP_CLASS_DATE = 100609UL;/* v1.1 oop  787 */
     public const Oop OOP_CLASS_TIME = 100865UL;/* v1.1 oop  789 */
@@ -228,7 +243,7 @@ internal static class ReservedOops
     public const Oop OOP_CLASS_N_DICTIONARY = 101377UL;/* v1.1 oop  793 */
     public const Oop OOP_CLASS_N_IDENTITY_DICTIONARY = 101633UL;/* v1.1 oop  795 */
     public const Oop OOP_CLASS_N_LANGUAGE_DICTIONARY = 101889UL;/* v1.1 oop  797 */
-    public const Oop OOP_CLASS_MODIFICATION_LOG = 102145UL;/* v1.1 oop  799 */
+    public const Oop OOP_CLASS_MODIFICATION_LOG = 102145UL;/* as of Gs64 v3.7.0+ not in base image */
 
     public const Oop OOP_CLASS_EQUALITY_SET = 102401UL;/* v1.1 oop  801 */
     public const Oop OOP_CLASS_EQUALITY_BAG = 102657UL;/* v1.1 oop  803 */
@@ -524,9 +539,11 @@ internal static class ReservedOops
     public const Oop OOP_CLASS_GsHostProcess = 160769UL;
     public const Oop OOP_CLASS_CCalloutStructs = 161025UL;
 
-    public const Oop OOP_LAST_KERNEL_OOP = 161025UL;
+	public const Oop OOP_EMPTY_InvariantUnicode7 = 165377UL;
 
-    /* from 160001, 175 oops left to LAST_EXPORTED_OOP=205057 */
+    public const Oop OOP_LAST_KERNEL_OOP = 165377UL;
+
+/* 154 oops left to LAST_EXPORTED_OOP=205057 */
 
     /* oops OOP_LAST_KERNEL_OOP+256 to OOP_LAST_EXPORTED_OOP(in oop.ht)
 	 * are also available for new kernel classes
