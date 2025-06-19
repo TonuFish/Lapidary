@@ -740,7 +740,7 @@ internal unsafe static partial class Methods
 	/// OopType obj,
 	/// GciErrSType* err) GCI_WEAK;
 	/// </remarks>
-	[LibraryImport(Version.GciTsDLL), cDefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial OopType GciTsFetchClass(
 		GciSession sess,
 		OopType obj,
@@ -909,9 +909,10 @@ internal unsafe static partial class Methods
 	/// int unicodeKind,
 	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
-	public static OopType GciTsNewStringFromUtf16(
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
+	public static partial OopType GciTsNewStringFromUtf16(
 		GciSession sess,
-		Span<char> words, // TODO: double check this
+		Span<ushort> words, // TODO: double check this
 		int64 nWords,
 		int unicodeKind,
 		ref GciErrSType err);
@@ -2024,6 +2025,7 @@ internal unsafe static partial class Methods
 	/// <remarks>
 	/// EXTERN_GCI_DEC(int64) GciTsKeepAliveCount(GciSession s, GciErrSType *err) GCI_WEAK ;
 	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial int64 GciTsKeepAliveCount(GciSession s, ref GciErrSType err);
 
 	/// <summary>
@@ -2066,6 +2068,7 @@ internal unsafe static partial class Methods
 	/// EXTERN_GCI_DEC(BoolType) GciTsDirtyExportedObjs(GciSession s, OopType theOops[], int *numOops,
 	/// GciErrSType *err) GCI_WEAK ;
 	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial BoolType GciTsDirtyExportedObjs(
 		GciSession s,
 		Span<OopType> theOops,
@@ -2080,6 +2083,7 @@ internal unsafe static partial class Methods
 	/// EXTERN_GCI_DEC(int64)
 	/// GciTsKeyfilePermissions(GciSession s, GciErrSType *err)  GCI_WEAK;
 	/// </remarks>
+	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
 	public static partial int64 GciTsKeyfilePermissions(GciSession s, ref GciErrSType err);
 
 	/// <summary>

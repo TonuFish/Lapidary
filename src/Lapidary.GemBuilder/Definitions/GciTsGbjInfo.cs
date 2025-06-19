@@ -36,7 +36,7 @@ internal ref struct GciTsGbjInfo
 	internal ushort objectSecurityPolicyId;
 	internal BitsMask _bits;
 
-	public GciTsObjInfo()
+	public GciTsGbjInfo()
 	{
 		objId = ReservedOops.OOP_NIL;
 		objClass = ReservedOops.OOP_NIL;
