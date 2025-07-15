@@ -302,7 +302,7 @@ public readonly ref partial struct GemObject : IEquatable<GemObject>
 
 	public readonly GemObject Perform(ReadOnlySpan<byte> selector, params ReadOnlySpan<object> argList)
 	{
-		// TODO: Fixed size stackalloc
+		// TODO: Fixed size stackalloc based on maximum number of selector args - if reasonable
 		Span<Oop> args = stackalloc Oop[argList.Length];
 
 		for (var ii = 0 ; ii < args.Length ; ++ii)
