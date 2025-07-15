@@ -1,11 +1,50 @@
 ﻿namespace Lapidary.GemBuilder.Definitions;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
+// TODO: Assuming memory layout of child here, confirm that at some point...
 
-// TODO: Finish this.
-
+/// <summary>
+/// 
+/// </summary>
+/// <remarks>
+/// gcits.ht
+/// </remarks>
 internal ref struct GciTsGbjInfo
 {
+	#region Gbj Specific Functionality
+
+	private enum ExtraBits : uint64
+	{
+		is_7bits = 0x1,  // from object header
+		is_utf16 = 0x2,
+		// is_utf8 not needed, instances of Utf8 have data returned to java as 7bit or as Utf16
+		strInfo_ChrSize = 0x7,
+		strInfo_icuString = 0x8, // Unicode7,Unicode16,Unicode32
+		strInfo_byteArrBit = 0x10,  // a ByteArray without Utf8 nor Utf16 encoding
+		strInfo_shift = 17,
+		strSymInfo_isSymbol = 0x20,
+	}
+
+	internal readonly bool Is7Bits => (extraBits & (uint64)ExtraBits.is_7bits) > 0;
+	internal readonly bool IsByteArray => ((extraBits >> 17) & (uint64)ExtraBits.strInfo_byteArrBit) > 0;
+	internal readonly bool IsLargeInteger => (extraBits & (1UL << 34)) > 0;
+	internal readonly bool IsNumber => (extraBits & (1UL << 23)) > 0;
+	internal readonly bool IsScaledDecimal => (extraBits & (1UL << 31)) > 0;
+	internal readonly bool IsUtf16 => (extraBits & (uint64)ExtraBits.is_utf16) > 0;
+	internal readonly bool IsUnicode => ((extraBits >> 17) & (uint64)ExtraBits.strInfo_icuString) > 0;
+
+	public uint64 CharSize()
+	{
+		return (extraBits >> 17) & (uint64)ExtraBits.strInfo_ChrSize;
+	}
+
+	#endregion Gbj Specific Functionality
+
+	internal readonly bool IsIndexable => _bits == BitsMask.indexable_mask;
+	internal readonly bool IsInvariant => _bits == BitsMask.invariant_mask;
+	internal readonly bool IsOverlayed => _bits == BitsMask.overlay_mask;
+	internal readonly bool IsPartial => _bits == BitsMask.partial_mask;
+
 	internal OopType objId;
 
 	/// <summary>
@@ -36,6 +75,9 @@ internal ref struct GciTsGbjInfo
 	internal ushort objectSecurityPolicyId;
 	internal BitsMask _bits;
 
+	internal uint64 extraBits;
+	internal int64 bytesReturned;
+
 	public GciTsGbjInfo()
 	{
 		objId = ReservedOops.OOP_NIL;
@@ -45,25 +87,18 @@ internal ref struct GciTsGbjInfo
 		access = 0;
 		objectSecurityPolicyId = 0;
 		_bits = 0;
+		extraBits = 0;
+		bytesReturned = 0;
 	}
 
-	internal enum BitsMask : ushort
+	internal readonly GciByteSwizEType ByteSwizKind()
 	{
-		implem_mask = 0x03,
-		indexable_mask = 0x04,
-		invariant_mask = 0x08,
-		partial_mask = 0x10,
-		overlay_mask = 0x20,
+		return (GciByteSwizEType)((ushort)(_bits & BitsMask.swiz_kind_mask) >> 8);
+	}
 
-		/// <summary>
-		/// Object is place holder for unsatisfied forward reference.
-		/// </summary>
-		is_placeholder = 0x40,
-
-		swiz_kind_mask = 0x300,
-#pragma warning disable CA1069 // Enums values should not be duplicated
-		swiz_kind_shift = 8,
-#pragma warning restore CA1069 // Enums values should not be duplicated
+	internal readonly byte ObjImpl()
+	{
+		return (byte)((ushort)_bits & 3); // GC_IMPLEMENTATION_MASK
 	}
 }
 #pragma warning restore CA1051 // Do not declare visible instance fields

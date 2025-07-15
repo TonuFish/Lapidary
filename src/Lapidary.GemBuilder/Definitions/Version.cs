@@ -2,7 +2,7 @@
 
 internal static class Version
 {
-    private const string FullVersionIdentifier = "3.7.4-64";
+    private const string FullVersionIdentifier = "3.7.4.1-64";
 
     /// <summary>
     /// Full name of the GciTs DLL.

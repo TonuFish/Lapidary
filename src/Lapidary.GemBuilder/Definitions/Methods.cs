@@ -657,8 +657,6 @@ internal unsafe static partial class Methods
 		size_t bufSize,
 		ref GciErrSType err);
 
-	// TODO: GciTsGbjInfo struct
-
 	/// <summary>
 	/// GciTsFetchGbjInfo
 	///  Function result is >= 0 for success or

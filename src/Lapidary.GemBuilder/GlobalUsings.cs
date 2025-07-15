@@ -16,6 +16,7 @@ global using ByteType = System.Byte;
 global using GciSession = System.IntPtr;
 global using OopType = System.UInt64;
 global using int64 = System.Int64;
+global using uint64 = System.UInt64;
 global using size_t = System.UInt64;
 global using ssize_t = System.Int64;
 global using time_t = System.Int64;
