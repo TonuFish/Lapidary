@@ -1,17 +1,22 @@
 <Project>
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
-		<LangVersion>latest</LangVersion>
-		<ImplicitUsings>disable</ImplicitUsings>
-		<Nullable>enable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		
+		<ImplicitUsings>disable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<TargetFramework>net9.0</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup Label="Build Settings">
 		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+	</PropertyGroup>
+
+	<PropertyGroup Label="Analysers">
 		<AnalysisLevel>latest-all</AnalysisLevel>
 		<IsAotCompatible>true</IsAotCompatible>
 	</PropertyGroup>
 
-	<ItemGroup>
+	<ItemGroup Label="Solution-wide Code">
 		<Compile Include="$(SolutionDir)\ModuleSettings.cs" Visible="false" />
 	</ItemGroup>
 </Project>
