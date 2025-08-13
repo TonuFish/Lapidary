@@ -19,4 +19,8 @@
 	<ItemGroup Label="Solution-wide Code">
 		<Compile Include="$(SolutionDir)\ModuleSettings.cs" Visible="false" />
 	</ItemGroup>
+
+	<ItemGroup Label="GemBuilder Files">
+		<Content Include="$(SolutionDir)\GemBuilderFiles\*.*" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+	</ItemGroup>
 </Project>
