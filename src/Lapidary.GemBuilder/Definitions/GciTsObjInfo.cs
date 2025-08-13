@@ -1,8 +1,19 @@
 ﻿namespace Lapidary.GemBuilder.Definitions;
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
+/// <summary>
+/// 
+/// </summary>
+/// <remarks>
+/// gcits.ht
+/// </remarks>
 internal ref struct GciTsObjInfo
 {
+	internal readonly bool IsIndexable => _bits == BitsMask.indexable_mask;
+	internal readonly bool IsInvariant => _bits == BitsMask.invariant_mask;
+	internal readonly bool IsOverlayed => _bits == BitsMask.overlay_mask;
+	internal readonly bool IsPartial => _bits == BitsMask.partial_mask;
+
 	internal OopType objId;
 
 	/// <summary>
@@ -43,23 +54,13 @@ internal ref struct GciTsObjInfo
 		_bits = 0;
 	}
 
-	internal enum BitsMask : ushort
+	internal readonly GciByteSwizEType ByteSwizKind()
 	{
-		implem_mask = 0x03,
-		indexable_mask = 0x04,
-		invariant_mask = 0x08,
-		partial_mask = 0x10,
-		overlay_mask = 0x20,
+		return (GciByteSwizEType)((ushort)(_bits & BitsMask.swiz_kind_mask) >> 8);
+	}
 
-		/// <summary>
-		/// Object is place holder for unsatisfied forward reference.
-		/// </summary>
-		is_placeholder = 0x40,
-
-		swiz_kind_mask = 0x300,
-#pragma warning disable CA1069 // Enums values should not be duplicated
-		swiz_kind_shift = 8,
-#pragma warning restore CA1069 // Enums values should not be duplicated
+	internal readonly byte ObjImpl()
+	{
+		return (byte)((ushort)_bits & 3); // GC_IMPLEMENTATION_MASK
 	}
 }
-#pragma warning restore CA1051 // Do not declare visible instance fields

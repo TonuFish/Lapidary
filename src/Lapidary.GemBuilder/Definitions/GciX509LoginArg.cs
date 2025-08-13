@@ -30,4 +30,9 @@ internal unsafe ref struct GciX509LoginArg
 		executedSessionInit = default;
 	}
 	*/
+
+	public readonly bool ArgsAreFileNames()
+	{
+		return argsArePemStrings != 0;
+	}
 }
