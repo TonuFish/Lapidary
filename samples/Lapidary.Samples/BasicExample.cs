@@ -59,7 +59,6 @@ public static class BasicExample
 		// Read some objects.
 		var resultAsText = result.Perform("printString"u8).GetString();
 		var resultAsNumber = result.GetNumber<int>();
-		var resultAsDateTime = result.GetDateTime();
 
 		// Disconnect your session.
 		manager.Logout(userSession);

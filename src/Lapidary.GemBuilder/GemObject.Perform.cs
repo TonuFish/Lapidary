@@ -40,7 +40,7 @@ public readonly ref partial struct GemObject
 		where T1 : allows ref struct
 		where T2 : allows ref struct
 	{
-		Span<Oop> args = [ConvertArgument(arg0), ConvertArgument(arg1), ConvertArgument(arg2)];
+		Span<Oop> args = [ConvertArgument(arg0), ConvertArgument(arg1), ConvertArgument(arg2),];
 		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
 	}
 
@@ -605,7 +605,7 @@ public readonly ref partial struct GemObject
 
 		if (type.IsClass)
 		{
-			return ConvertArgumentReference(argument);
+			return ConvertArgumentNotNullReference(argument);
 		}
 		else if (type == typeof(int))
 		{
@@ -637,7 +637,7 @@ public readonly ref partial struct GemObject
 		return ThrowHelper.GenericExceptionToDetailLater<Oop>();
 	}
 
-	private readonly Oop ConvertArgumentReference(object argument)
+	private readonly Oop ConvertArgumentNotNullReference(object argument)
 	{
 		// This method would be local to ConvertArgumentNotNullReferenceOrBox if this wasn't a struct.
 
