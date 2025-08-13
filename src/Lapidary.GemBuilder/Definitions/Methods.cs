@@ -8,7 +8,7 @@ namespace Lapidary.GemBuilder.Definitions;
 /// <remarks>
 /// gcits.hf
 /// </remarks>
-internal unsafe static partial class Methods
+internal static partial class Methods
 {
 	/// <summary>
 	/// GciTsEncrypt
@@ -21,7 +21,10 @@ internal unsafe static partial class Methods
 	/// <c>EXTERN_GCI_DEC(char*) GciTsEncrypt(const char* password, char* outBuf, size_t outBuffSize) GCI_WEAK;</c>
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-	public static partial byte* GciTsEncrypt(/* const */ ReadOnlySpan<byte> password, Span<byte> outBuf, size_t outBuffSize);
+	public static unsafe partial byte* GciTsEncrypt(
+		/* const */ ReadOnlySpan<byte> password,
+		Span<byte> outBuf,
+		size_t outBuffSize);
 
 	/// <summary>
 	/// GciTsLogin
@@ -648,7 +651,7 @@ internal unsafe static partial class Methods
 	/// GciErrSType* err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-	public static partial int64 GciTsFetchObjInfo(
+	public static unsafe partial int64 GciTsFetchObjInfo(
 		GciSession sess,
 		OopType objId,
 		BoolType addToExportSet,
@@ -684,7 +687,7 @@ internal unsafe static partial class Methods
 	/// GciErrSType *err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-	public static partial int64 GciTsFetchGbjInfo(
+	public static unsafe partial int64 GciTsFetchGbjInfo(
 		GciSession sess,
 		OopType objId,
 		BoolType addToExportSet,
@@ -1517,7 +1520,7 @@ internal unsafe static partial class Methods
 	/// GciErrSType* err) GCI_WEAK;
 	/// </remarks>
 	[LibraryImport(Version.GciTsDLL), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-	public static partial OopType GciTsContinueWith(
+	public static unsafe partial OopType GciTsContinueWith(
 		GciSession sess,
 		OopType gsProcess,
 		OopType replaceTopOfStack,
