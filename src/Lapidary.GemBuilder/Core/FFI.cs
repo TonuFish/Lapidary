@@ -382,10 +382,11 @@ internal static class FFI
 		ReadOnlySpan<byte> gemService,
 		ReadOnlySpan<byte> username,
 		ReadOnlySpan<byte> password,
-		out GemBuilderSession session)
+		[NotNullWhen(true)] out GciSession? session,
+		[NotNullWhen(false)] out GemBuilderErrorInformation? error)
 	{
 		var sessionStarted = 0;
-		GciErrSType error = new();
+		GciErrSType loginError = new();
 
 		var sessionId = Methods.GciTsLogin(
 			StoneNameNrs: stoneName,
@@ -398,17 +399,17 @@ internal static class FFI
 			loginFlags: LoginFlags.GCI_LOGIN_QUIET,
 			haltOnErrNum: 0,
 			executedSessionInit: ref sessionStarted,
-			err: ref error);
-
-		// TODO: This has no business returning a full session object.
-		session = new(sessionId);
+			err: ref loginError);
 
 		if (sessionId == 0 || sessionStarted == 0)
 		{
-			session.AddError(ref error);
+			session = 0;
+			error = loginError.WrapError();
 			return false;
 		}
 
+		session = sessionId;
+		error = null;
 		return true;
 	}
 
@@ -419,10 +420,11 @@ internal static class FFI
 		ReadOnlySpan<byte> gemService,
 		ReadOnlySpan<byte> username,
 		ReadOnlySpan<byte> password,
-		out GemBuilderSession session)
+		[NotNullWhen(true)] out GciSession? session,
+		[NotNullWhen(false)] out GemBuilderErrorInformation? error)
 	{
 		var sessionStarted = 0;
-		GciErrSType error = new();
+		GciErrSType loginError = new();
 
 		var sessionId = Methods.GciTsLogin(
 			StoneNameNrs: stoneName,
@@ -435,17 +437,17 @@ internal static class FFI
 			loginFlags: LoginFlags.GCI_LOGIN_PW_ENCRYPTED | LoginFlags.GCI_LOGIN_QUIET,
 			haltOnErrNum: 0,
 			executedSessionInit: ref sessionStarted,
-					err: ref error);
-
-		// TODO: This has no business returning a full session object.
-		session = new(sessionId);
+			err: ref loginError);
 
 		if (sessionId == 0 || sessionStarted == 0)
 		{
-			session.AddError(ref error);
+			session = 0;
+			error = loginError.WrapError();
 			return false;
 		}
 
+		session = sessionId;
+		error = null;
 		return true;
 	}
 
@@ -459,12 +461,13 @@ internal static class FFI
 		ReadOnlySpan<byte> dirArg,
 		ReadOnlySpan<byte> logArg,
 		bool argsArePemStrings, // TODO: Might be able to parse the args for this one
-		out GemBuilderSession session)
+		[NotNullWhen(true)] out GciSession? session,
+		[NotNullWhen(false)] out GemBuilderErrorInformation? error)
 	{
 		// TODO: Come back to this utter calamity.
 
 		var sessionStarted = 0;
-		GciErrSType error = new();
+		GciErrSType loginError = new();
 		GciSession sessionId;
 
 		unsafe
@@ -494,20 +497,20 @@ internal static class FFI
 					executedSessionInit = 0,
 				};
 
-				sessionId = Methods.GciTsX509Login(ref loginArgs, ref sessionStarted, ref error);
+				sessionId = Methods.GciTsX509Login(ref loginArgs, ref sessionStarted, ref loginError);
 			}
 #pragma warning restore RCS1001 // Add braces (when expression spans over multiple lines)
 		}
 
-		// TODO: This has no business returning a full session object.
-		session = new(sessionId);
-
 		if (sessionId == 0 || sessionStarted == 0)
 		{
-			session.AddError(ref error);
+			session = 0;
+			error = loginError.WrapError();
 			return false;
 		}
 
+		session = sessionId;
+		error = null;
 		return true;
 	}
 
