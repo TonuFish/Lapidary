@@ -1,9 +1,8 @@
 ﻿namespace Lapidary.GemBuilder.Definitions;
-#pragma warning restore CA1051 // Do not declare visible instance fields
 
 // TODO: Confirm if this should be marked as flags.
 
-internal enum BitsMask : ushort
+public enum BitsMask : ushort
 {
 	implem_mask = 0x03,
 	indexable_mask = 0x04,

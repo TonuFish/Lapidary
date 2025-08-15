@@ -2,6 +2,9 @@
 global using System.Collections.Generic;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Runtime.CompilerServices;
+global using Lapidary.Core;
+global using Lapidary.Extensions;
+global using Lapidary.GemBuilder;
 global using Lapidary.GemBuilder.Core;
 global using Lapidary.GemBuilder.Definitions;
 

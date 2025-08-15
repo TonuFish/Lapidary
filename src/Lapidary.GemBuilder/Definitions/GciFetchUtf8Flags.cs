@@ -1,7 +1,7 @@
 ﻿namespace Lapidary.GemBuilder.Definitions;
 
 [Flags]
-internal enum GciFetchUtf8Flags
+public enum GciFetchUtf8Flags
 {
     GCI_UTF8_FetchNormal = 0,
 

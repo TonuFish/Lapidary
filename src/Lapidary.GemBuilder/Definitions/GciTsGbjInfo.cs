@@ -9,7 +9,7 @@
 /// <remarks>
 /// gcits.ht
 /// </remarks>
-internal ref struct GciTsGbjInfo
+public ref struct GciTsGbjInfo
 {
 	#region Gbj Specific Functionality
 
@@ -25,13 +25,13 @@ internal ref struct GciTsGbjInfo
 		strSymInfo_isSymbol = 0x20,
 	}
 
-	internal readonly bool Is7Bits => (extraBits & (uint64)ExtraBits.is_7bits) > 0;
-	internal readonly bool IsByteArray => ((extraBits >> 17) & (uint64)ExtraBits.strInfo_byteArrBit) > 0;
-	internal readonly bool IsLargeInteger => (extraBits & (1UL << 34)) > 0;
-	internal readonly bool IsNumber => (extraBits & (1UL << 23)) > 0;
-	internal readonly bool IsScaledDecimal => (extraBits & (1UL << 31)) > 0;
-	internal readonly bool IsUtf16 => (extraBits & (uint64)ExtraBits.is_utf16) > 0;
-	internal readonly bool IsUnicode => ((extraBits >> 17) & (uint64)ExtraBits.strInfo_icuString) > 0;
+	public readonly bool Is7Bits => (extraBits & (uint64)ExtraBits.is_7bits) > 0;
+	public readonly bool IsByteArray => ((extraBits >> 17) & (uint64)ExtraBits.strInfo_byteArrBit) > 0;
+	public readonly bool IsLargeInteger => (extraBits & (1UL << 34)) > 0;
+	public readonly bool IsNumber => (extraBits & (1UL << 23)) > 0;
+	public readonly bool IsScaledDecimal => (extraBits & (1UL << 31)) > 0;
+	public readonly bool IsUtf16 => (extraBits & (uint64)ExtraBits.is_utf16) > 0;
+	public readonly bool IsUnicode => ((extraBits >> 17) & (uint64)ExtraBits.strInfo_icuString) > 0;
 
 	public uint64 CharSize()
 	{
@@ -40,27 +40,27 @@ internal ref struct GciTsGbjInfo
 
 	#endregion Gbj Specific Functionality
 
-	internal readonly bool IsIndexable => _bits == BitsMask.indexable_mask;
-	internal readonly bool IsInvariant => _bits == BitsMask.invariant_mask;
-	internal readonly bool IsOverlayed => _bits == BitsMask.overlay_mask;
-	internal readonly bool IsPartial => _bits == BitsMask.partial_mask;
+	public readonly bool IsIndexable => _bits == BitsMask.indexable_mask;
+	public readonly bool IsInvariant => _bits == BitsMask.invariant_mask;
+	public readonly bool IsOverlayed => _bits == BitsMask.overlay_mask;
+	public readonly bool IsPartial => _bits == BitsMask.partial_mask;
 
-	internal OopType objId;
+	public OopType objId;
 
 	/// <summary>
 	/// OOP of the class of the obj.
 	/// </summary>
-	internal OopType objClass;
+	public OopType objClass;
 
 	/// <summary>
 	/// Obj's total size, in bytes or OOPs.
 	/// </summary>
-	internal int64 objSize;
+	public int64 objSize;
 
 	/// <summary>
 	/// Num of named inst vars in the obj.
 	/// </summary>
-	internal int namedSize;
+	public int namedSize;
 
 	/// <summary>
 	/// <list type="bullet">
@@ -70,13 +70,13 @@ internal ref struct GciTsGbjInfo
 	/// <item>4 auth not exist</item>
 	/// </list>
 	/// </summary>
-	internal uint access;
+	public uint access;
 
-	internal ushort objectSecurityPolicyId;
-	internal BitsMask _bits;
+	public ushort objectSecurityPolicyId;
+	public BitsMask _bits;
 
-	internal uint64 extraBits;
-	internal int64 bytesReturned;
+	public uint64 extraBits;
+	public int64 bytesReturned;
 
 	public GciTsGbjInfo()
 	{
@@ -91,12 +91,12 @@ internal ref struct GciTsGbjInfo
 		bytesReturned = 0;
 	}
 
-	internal readonly GciByteSwizEType ByteSwizKind()
+	public readonly GciByteSwizEType ByteSwizKind()
 	{
 		return (GciByteSwizEType)((ushort)(_bits & BitsMask.swiz_kind_mask) >> 8);
 	}
 
-	internal readonly byte ObjImpl()
+	public readonly byte ObjImpl()
 	{
 		return (byte)((ushort)_bits & 3); // GC_IMPLEMENTATION_MASK
 	}

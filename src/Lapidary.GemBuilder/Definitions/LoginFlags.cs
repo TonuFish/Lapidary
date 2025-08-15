@@ -7,7 +7,7 @@
 /// gci.ht
 /// </remarks>
 [Flags]
-internal enum LoginFlags : uint
+public enum LoginFlags : uint
 {
     /// <summary>
     /// The gemstonePassword is encrypted.

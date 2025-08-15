@@ -1,6 +1,6 @@
 ﻿namespace Lapidary.GemBuilder.Core;
 
-internal static class FFI
+public static class FFI
 {
 	public static bool AbortTransaction(GemBuilderSession session)
 	{

@@ -1,6 +1,6 @@
 ﻿namespace Lapidary.GemBuilder.Definitions;
 
-internal enum GciEventType
+public enum GciEventType
 {
     gciSigNone,
     gciSigAbort,

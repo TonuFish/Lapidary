@@ -8,7 +8,7 @@ namespace Lapidary.GemBuilder.Definitions;
 /// <remarks>
 /// gcits.hf
 /// </remarks>
-internal static partial class Methods
+public static partial class Methods
 {
 	/// <summary>
 	/// GciTsEncrypt

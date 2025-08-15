@@ -6,7 +6,7 @@
 /// <remarks>
 /// gci.ht
 /// </remarks>
-internal enum GciByteSwizEType
+public enum GciByteSwizEType
 {
 	gci_byte_swiz_none = 0,
 	gci_byte_swiz_2_bytes = 1,

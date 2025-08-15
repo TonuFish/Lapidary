@@ -1,18 +1,18 @@
 ﻿namespace Lapidary.GemBuilder.Definitions;
 
-internal unsafe ref struct GciX509LoginArg
+public unsafe ref struct GciX509LoginArg
 {
-	/* const */ internal byte* netldiHostOrIp;
-	/* const */ internal byte* netldiNameOrPort;
-	/* const */ internal byte* privateKey;
-	/* const */ internal byte* cert;
-	/* const */ internal byte* caCert;
-	/* const */ internal byte* extraGemArgs;
-	/* const */ internal byte* dirArg; // #dir
-	/* const */ internal byte* logArg; // #log
-	internal LoginFlags loginFlags;
-	internal BoolType argsArePemStrings; // TRUE: args are PEM. FALSE: args are file names
-	internal BoolType executedSessionInit; // output
+	/* const */ public byte* netldiHostOrIp;
+	/* const */ public byte* netldiNameOrPort;
+	/* const */ public byte* privateKey;
+	/* const */ public byte* cert;
+	/* const */ public byte* caCert;
+	/* const */ public byte* extraGemArgs;
+	/* const */ public byte* dirArg; // #dir
+	/* const */ public byte* logArg; // #log
+	public LoginFlags loginFlags;
+	public BoolType argsArePemStrings; // TRUE: args are PEM. FALSE: args are file names
+	public BoolType executedSessionInit; // output
 
 	/* Expected constructor matches default initialisation (for now).
 	public GciX509LoginArg()

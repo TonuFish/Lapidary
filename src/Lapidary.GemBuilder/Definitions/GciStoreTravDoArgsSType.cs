@@ -6,7 +6,7 @@
 /// <remarks>
 /// gcicmn.ht
 /// </remarks>
-internal unsafe struct GciStoreTravDoArgsSType
+public unsafe struct GciStoreTravDoArgsSType
 {
 	// TODO: Scaffolded, absolutely not a proper implementation. Calculate manual offsets for the union.
 
@@ -21,17 +21,17 @@ internal unsafe struct GciStoreTravDoArgsSType
 	///      else ignore u.perform.receiver
 	/// for all other Gci calls , 0 == ExecuteStr , all other values == Perform
 	/// </summary>
-	internal int doPerform;
+	public int doPerform;
 
-	internal int doFlags;  /* per GciPerformNoDebug */
-	internal int alteredNumOops;   /* input/output */
-	internal BoolType alteredCompleted; /* output */
+	public int doFlags;  /* per GciPerformNoDebug */
+	public int alteredNumOops;   /* input/output */
+	public BoolType alteredCompleted; /* output */
 
 	// union `u`
 
-	internal GciTravBufType* storeTravBuff;
-	internal OopType* alteredTheOops;   /* output */
-	internal int storeTravFlags;   /* GCI_STORE_TRAV* bits from gci.ht */
+	public GciTravBufType* storeTravBuff;
+	public OopType* alteredTheOops;   /* output */
+	public int storeTravFlags;   /* GCI_STORE_TRAV* bits from gci.ht */
 }
 
 /// <summary>
@@ -40,7 +40,7 @@ internal unsafe struct GciStoreTravDoArgsSType
 /// <remarks>
 /// gcicmn.ht
 /// </remarks>
-internal unsafe struct GciPerformNoDebugArgs
+public unsafe struct GciPerformNoDebugArgs
 {
 	OopType receiver;
 	// TODO: Manual offset instead of pad. Does the padding have the be zeroed?
@@ -57,16 +57,16 @@ internal unsafe struct GciPerformNoDebugArgs
 /// <remarks>
 /// gcicmn.ht
 /// </remarks>
-internal unsafe struct ExecuteStrOrBlockArgs
+public unsafe struct ExecuteStrOrBlockArgs
 {
-	OopType contextObject;
-	OopType sourceClass; // String, Utf8 or Unicode7 or DoubleByteString
-	OopType symbolList;
-	int64 sourceSize;
-	/* const */ char* source; // 1 or 2 bytes per char, client-native byte order
-	/* const */ OopType* args;         // ignored unless ExecuteBlock
-	int numArgs;             // ignored unless ExecuteBlock
-	ushort environmentId;  // compilation environment for execution
+	public OopType contextObject;
+	public OopType sourceClass; // String, Utf8 or Unicode7 or DoubleByteString
+	public OopType symbolList;
+	public int64 sourceSize;
+	/* const */ public char* source; // 1 or 2 bytes per char, client-native byte order
+	/* const */ public OopType* args;         // ignored unless ExecuteBlock
+	public int numArgs;             // ignored unless ExecuteBlock
+	public ushort environmentId;  // compilation environment for execution
 }
 
 /// <summary>
@@ -75,10 +75,10 @@ internal unsafe struct ExecuteStrOrBlockArgs
 /// <remarks>
 /// gcicmn.ht
 /// </remarks>
-internal struct GciContinueWithArgs
+public struct GciContinueWithArgs
 {
-	OopType process;
-	OopType replaceTopOfStack;
+	public OopType process;
+	public OopType replaceTopOfStack;
 	// also uses doFlags above
 	// GciErrSType *error input of GciContinueWith() always NULL
 }
