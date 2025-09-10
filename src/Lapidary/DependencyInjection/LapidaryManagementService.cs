@@ -113,10 +113,7 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 			username: usernameBuffer,
 			password: passwordBuffer);
 
-		GemBuilderSession session = new(sessionId)
-		{
-			Bucket = database
-		};
+		GemBuilderSession session = new(sessionId, database);
 
 		if (!database.IsPrepared)
 		{
@@ -168,10 +165,7 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 			username: credentials.Username.Span,
 			password: credentials.Password.Span);
 
-		GemBuilderSession session = new(sessionId)
-		{
-			Bucket = database
-		};
+		GemBuilderSession session = new(sessionId, database);
 
 		if (!database.IsPrepared)
 		{
@@ -211,10 +205,7 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 			logArg: logArgBuffer,
 			argsArePemStrings: credentials.ArgsArePemStrings);
 
-		GemBuilderSession session = new(sessionId)
-		{
-			Bucket = database
-		};
+		GemBuilderSession session = new(sessionId, database);
 
 		if (!database.IsPrepared)
 		{

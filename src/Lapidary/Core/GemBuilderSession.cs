@@ -5,21 +5,21 @@ namespace Lapidary.Core;
 
 internal sealed class GemBuilderSession
 {
-	internal DatabaseBucket? Bucket { get; set; } // TODO: FFI Logins to return raw session, rather than this set.
-	internal bool IsActiveSession => SessionId != GciSession.Zero;
-	internal GciSession SessionId { get; init; } = GciSession.Zero;
+	internal DatabaseBucket Bucket { get; }
+	internal GciSession Session { get; }
 
 	private readonly Queue<GemBuilderErrorInformation> _errors = new();
 
-	public GemBuilderSession(GciSession sessionId)
+	internal GemBuilderSession(GciSession session, DatabaseBucket bucket)
 	{
-		SessionId = sessionId;
+		Bucket = bucket;
+		Session = session;
 	}
 
 	internal ILapidaryConverter? GetClassConverter(Type targetType, Oop classOop)
 	{
 		// TODO: Clarify null safety after restructure.
-		return Bucket!.ClassConverters!.TryGetValue(new(classOop, targetType), out var converter)
+		return Bucket.ClassConverters!.TryGetValue(new(classOop, targetType), out var converter)
 			? converter
 			: null;
 	}
@@ -27,7 +27,7 @@ internal sealed class GemBuilderSession
 	internal ILapidaryConverter? GetNumberConverter(Oop numberOop)
 	{
 		// TODO: Clarify null safety after restructure.
-		return Bucket!.NumberConverters!.TryGetValue(numberOop, out var converter)
+		return Bucket.NumberConverters!.TryGetValue(numberOop, out var converter)
 			? converter
 			: null;
 	}
@@ -35,14 +35,14 @@ internal sealed class GemBuilderSession
 	internal ILapidaryConverter? GetStructConverter(Type targetType, Oop structOop)
 	{
 		// TODO: Clarify null safety after restructure.
-		return Bucket!.StructConverters!.TryGetValue(new(structOop, targetType), out var converter)
+		return Bucket.StructConverters!.TryGetValue(new(structOop, targetType), out var converter)
 			? converter
 			: null;
 	}
 
 	#region VERY TEMPORARY IMPLICIT CONVERSION
 
-	public static implicit operator GciSession(GemBuilderSession session) => session.SessionId;
+	public static implicit operator GciSession(GemBuilderSession session) => session.Session;
 
 	#endregion VERY TEMPORARY IMPLICIT CONVERSION
 
