@@ -9,12 +9,12 @@ internal static class ThrowHelper
     [DoesNotReturn, DebuggerHidden, StackTraceHidden]
     public static void GenericExceptionToDetailLater()
     {
-        throw new GemException();
+        throw new InvalidOperationException();
     }
 
     [DoesNotReturn, DebuggerHidden, StackTraceHidden]
     public static T GenericExceptionToDetailLater<T>()
     {
-        throw new GemException();
+        throw new InvalidOperationException();
     }
 }

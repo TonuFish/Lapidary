@@ -10,6 +10,7 @@ public sealed class NonBlockingExecute
 
 	public NonBlockingExecute(GemContext context, CancellationToken ct = default)
 	{
+		// TODO: Exception types here.
 		_context = context;
 		_ct = ct;
 	}
@@ -18,7 +19,7 @@ public sealed class NonBlockingExecute
 	{
 		return _context.ExecuteNonBlocking(command)
 			? PollForResult()
-			: Task.FromException<PersistentGemObject>(new GemException("Async call failed to start."));
+			: Task.FromException<PersistentGemObject>(new InvalidOperationException("Async call failed to start."));
 
 		Task<PersistentGemObject> PollForResult()
 		{
@@ -39,7 +40,7 @@ public sealed class NonBlockingExecute
 			var result = _context.GetNonBlockingResult();
 			if (result.IsIllegalObject)
 			{
-				return Task.FromException<PersistentGemObject>(new GemException("Async call errored."));
+				return Task.FromException<PersistentGemObject>(new InvalidOperationException("Async call errored."));
 			}
 
 			return Task.FromResult<PersistentGemObject>(result.ToPersistentObject());

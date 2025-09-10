@@ -6,6 +6,8 @@ namespace Lapidary;
 
 public sealed partial class GemContext
 {
+	// TODO: Exception types here.
+
 	public bool NonBlockingCallInProgress()
 	{
 		return FFI.PollForNonBlockingResult(Session) == false;
@@ -30,7 +32,7 @@ public sealed partial class GemContext
 			|| !Session.TryGetError(out var error)
 			|| error.Number != 6003)
 		{
-			throw new GemException("!! Async cancellation errored by something other than soft break.");
+			throw new InvalidOperationException("!! Async cancellation errored by something other than soft break.");
 		}
 	}
 
@@ -51,10 +53,10 @@ public sealed partial class GemContext
 			{
 				// TODO: Quick hack reference - 6003 = SoftBreak, 6004 HardBreak.
 				// If it's neither of these, it's real and fatal.
-				throw new GemException("!! Async result after pooling killed by error.");
+				throw new InvalidOperationException("!! Async result after pooling killed by error.");
 			}
 
-			throw new GemException("!! Async result after pooling killed by break.");
+			throw new InvalidOperationException("!! Async result after pooling killed by break.");
 		}
 
 		return new(Session, oop);

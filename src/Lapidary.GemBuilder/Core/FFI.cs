@@ -2,63 +2,59 @@
 
 public static class FFI
 {
-	public static bool AbortTransaction(GemBuilderSession session)
+	public static bool AbortTransaction(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var abortSuccessful = Methods.GciTsAbort(session.SessionId, ref error);
+		var abortSuccessful = Methods.GciTsAbort(session, ref error);
 		if (abortSuccessful == 0)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return true;
 	}
 
-	public static bool BeginTransaction(GemBuilderSession session)
+	public static bool BeginTransaction(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var openedTransaction = Methods.GciTsBegin(session.SessionId, ref error);
+		var openedTransaction = Methods.GciTsBegin(session, ref error);
 		if (openedTransaction == 0)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return true;
 	}
 
-	public static Oop BlockForNonBlockingResult(GemBuilderSession session)
+	public static Oop BlockForNonBlockingResult(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var result = Methods.GciTsNbResult(session.SessionId, ref error);
-
+		var result = Methods.GciTsNbResult(session, ref error);
 		if (result == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return result;
 	}
 
-	public static bool CommitTransaction(GemBuilderSession session)
+	public static bool CommitTransaction(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var committedTransaction = Methods.GciTsCommit(session.SessionId, ref error);
+		var committedTransaction = Methods.GciTsCommit(session, ref error);
 		if (committedTransaction == 0)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return true;
 	}
 
-	public static bool ContinueProcessAfterException(GemBuilderSession session, Oop process)
+	public static bool ContinueProcessAfterException(GciSession session, Oop process)
 	{
 		GciErrSType error = new();
 
@@ -66,18 +62,16 @@ public static class FFI
 		unsafe
 		{
 			continueResult = Methods.GciTsContinueWith(
-				session.SessionId,
+				session,
 				process,
 				ReservedOops.OOP_ILLEGAL,
 				null,
 				0,
 				ref error);
 		}
-
 		if (continueResult == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return true;
@@ -117,12 +111,12 @@ public static class FFI
 		}
 	}
 
-	public static Oop Execute(GemBuilderSession session, ReadOnlySpan<byte> command)
+	public static Oop Execute(GciSession session, ReadOnlySpan<byte> command)
 	{
 		GciErrSType error = new();
 
 		var oop = Methods.GciTsExecute(
-			session.SessionId,
+			session,
 			command,
 			ReservedOops.OOP_CLASS_Utf8,
 			ReservedOops.OOP_ILLEGAL,
@@ -130,22 +124,20 @@ public static class FFI
 			0,
 			0,
 			ref error);
-
 		if (oop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return ReservedOops.OOP_ILLEGAL;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return oop;
 	}
 
-	public static bool ExecuteNonBlocking(GemBuilderSession session, ReadOnlySpan<byte> command)
+	public static bool ExecuteNonBlocking(GciSession session, ReadOnlySpan<byte> command)
 	{
 		GciErrSType error = new();
 
 		var result = Methods.GciTsNbExecute(
-			session.SessionId,
+			session,
 			command,
 			ReservedOops.OOP_CLASS_Utf8,
 			ReservedOops.OOP_ILLEGAL,
@@ -153,18 +145,16 @@ public static class FFI
 			0,
 			0,
 			ref error);
-
 		if (result == 0)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return true;
 	}
 
 	public static Oop ForeignPerform(
-		GemBuilderSession session,
+		GciSession session,
 		Oop root,
 		ReadOnlySpan<byte> selector,
 		ReadOnlySpan<Oop> args)
@@ -172,7 +162,7 @@ public static class FFI
 		GciErrSType error = new();
 
 		var oop = Methods.GciTsPerform(
-			session.SessionId,
+			session,
 			root,
 			ReservedOops.OOP_ILLEGAL,
 			selector,
@@ -181,18 +171,16 @@ public static class FFI
 			0,
 			0,
 			ref error);
-
 		if (oop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return ReservedOops.OOP_ILLEGAL;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return oop;
 	}
 
 	public static bool ForeignPerformNonBlocking(
-		GemBuilderSession session,
+		GciSession session,
 		Oop root,
 		ReadOnlySpan<byte> selector,
 		ReadOnlySpan<Oop> args)
@@ -200,7 +188,7 @@ public static class FFI
 		GciErrSType error = new();
 
 		var result = Methods.GciTsNbPerform(
-			session.SessionId,
+			session,
 			root,
 			ReservedOops.OOP_ILLEGAL,
 			selector,
@@ -209,41 +197,37 @@ public static class FFI
 			0,
 			0,
 			ref error);
-
 		if (result == 0)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return true;
 	}
 
-	public static int GetCollectionObjects(GemBuilderSession session, Oop root, long startIndex, Span<Oop> oops)
+	public static int GetCollectionObjects(GciSession session, Oop root, long startIndex, Span<Oop> oops)
 	{
 		GciErrSType error = new();
 
-		var oopCount = Methods.GciTsFetchOops(session.SessionId, root, startIndex, oops, oops.Length, ref error);
+		var oopCount = Methods.GciTsFetchOops(session, root, startIndex, oops, oops.Length, ref error);
 		if (oopCount == -1)
 		{
-			session.AddError(ref error);
-			return 0;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return oopCount;
 	}
 
-	public static double GetFloat(GemBuilderSession session, Oop root)
+	public static double GetFloat(GciSession session, Oop root)
 	{
 		GciErrSType error = new();
-		double num = default;
 
 		// Should only return false if `root` isn't a SmallDouble/Float
-		var readSuccessful = Methods.GciTsOopToDouble(session.SessionId, root, ref num, ref error);
+		double num = default;
+		var readSuccessful = Methods.GciTsOopToDouble(session, root, ref num, ref error);
 		if (readSuccessful == 0)
 		{
-			session.AddError(ref error);
-			return 0D;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return num;
@@ -255,140 +239,126 @@ public static class FFI
 		return buffer[..(buffer.LastIndexOfAnyExcept((byte)0) + 1)];
 	}
 
-	public static long GetLargeInteger(GemBuilderSession session, Oop root)
+	public static long GetLargeInteger(GciSession session, Oop root)
 	{
 		GciErrSType error = new();
-		long num = default;
 
 		// Should only return false if the number exceeds the bounds of i64  (2^63-1, 2^-63)
-		var readSuccessful = Methods.GciTsOopToI64(session.SessionId, root, ref num, ref error);
+		long num = default;
+		var readSuccessful = Methods.GciTsOopToI64(session, root, ref num, ref error);
 		if (readSuccessful == 0)
 		{
-			session.AddError(ref error);
-			return 0L;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return num;
 	}
 
-	public static Oop GetObjectClass(GemBuilderSession session, Oop root)
+	public static Oop GetObjectClass(GciSession session, Oop root)
 	{
 		GciErrSType error = new();
 
-		var classOop = Methods.GciTsFetchClass(session.SessionId, root, ref error);
+		var classOop = Methods.GciTsFetchClass(session, root, ref error);
 		if (classOop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return ReservedOops.OOP_ILLEGAL;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return classOop;
 	}
 
-	public static long GetObjectSize(GemBuilderSession session, Oop root)
+	public static long GetObjectSize(GciSession session, Oop root)
 	{
 		GciErrSType error = new();
 
-		var size = Methods.GciTsFetchSize(session.SessionId, root, ref error);
+		var size = Methods.GciTsFetchSize(session, root, ref error);
 		if (size == -1)
 		{
-			session.AddError(ref error);
-			return 0L;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return size;
 	}
 
-	public static int GetSocket(GemBuilderSession session)
+	public static int GetSocket(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var result = Methods.GciTsSocket(session.SessionId, ref error);
-
+		var result = Methods.GciTsSocket(session, ref error);
 		if (result == -1)
 		{
-			session.AddError(ref error);
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return result;
 	}
 
-	public static ReadOnlySpan<byte> GetString(GemBuilderSession session, Oop root, Span<byte> buffer)
+	public static ReadOnlySpan<byte> GetString(GciSession session, Oop root, Span<byte> buffer)
 	{
 		// NOTE -- As this is using GciTsFetchUtf8 instead of GciTsFetchUtf8Bytes, the string is null terminated
 		// and the caller needs to add 1 to the buffer before passing it in.
 
 		GciErrSType error = new();
+
 		long requiredSize = default;
-
-		var bytesWritten = Methods
-			.GciTsFetchUtf8(session.SessionId, root, buffer, buffer.Length, ref requiredSize, ref error);
-
+		var bytesWritten = Methods.GciTsFetchUtf8(session, root, buffer, buffer.Length, ref requiredSize, ref error);
 		if (bytesWritten == -1)
 		{
-			session.AddError(ref error);
-			return [];
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return buffer[..(int)bytesWritten];
 	}
 
-	public static ReadOnlySpan<byte> GetSingleByteString(GemBuilderSession session, Oop root, Span<byte> buffer)
+	public static ReadOnlySpan<byte> GetSingleByteString(GciSession session, Oop root, Span<byte> buffer)
 	{
 		GciErrSType error = new();
 
-		var bytesWritten = Methods
-			.GciTsFetchBytes(session.SessionId, root, 1L, buffer, buffer.Length, ref error);
-
+		var bytesWritten = Methods.GciTsFetchBytes(session, root, 1L, buffer, buffer.Length, ref error);
 		if (bytesWritten == -1)
 		{
-			session.AddError(ref error);
-			return [];
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return buffer[..(int)bytesWritten];
 	}
 
-	public static void HardBreak(GemBuilderSession session)
+	public static void HardBreak(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var result = Methods.GciTsBreak(session.SessionId, 1, ref error);
-
+		var result = Methods.GciTsBreak(session, 1, ref error);
 		if (result == 0)
 		{
-			session.AddError(ref error);
+			ThrowHelper.GenericFFIException(ref error);
 		}
 	}
 
-	public static bool IsKindOfClass(GemBuilderSession session, Oop root, Oop @class)
+	public static bool IsKindOfClass(GciSession session, Oop root, Oop @class)
 	{
 		GciErrSType error = new();
 
-		var isClass = Methods.GciTsIsKindOfClass(session.SessionId, root, @class, ref error);
+		var isClass = Methods.GciTsIsKindOfClass(session, root, @class, ref error);
 		if (isClass == -1)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return isClass == 1;
 	}
 
-	public static bool Login(
+	public static GciSession Login(
 		ReadOnlySpan<byte> stoneName,
 		ReadOnlySpan<byte> hostUsername,
 		ReadOnlySpan<byte> hostPassword,
 		ReadOnlySpan<byte> gemService,
 		ReadOnlySpan<byte> username,
-		ReadOnlySpan<byte> password,
-		[NotNullWhen(true)] out GciSession? session,
-		[NotNullWhen(false)] out GemBuilderErrorInformation? error)
+		ReadOnlySpan<byte> password)
 	{
-		var sessionStarted = 0;
-		GciErrSType loginError = new();
+		GciErrSType error = new();
 
-		var sessionId = Methods.GciTsLogin(
+		var sessionStarted = 0;
+		var session = Methods.GciTsLogin(
 			StoneNameNrs: stoneName,
 			HostUserId: hostUsername,
 			HostPassword: hostPassword,
@@ -399,34 +369,28 @@ public static class FFI
 			loginFlags: LoginFlags.GCI_LOGIN_QUIET,
 			haltOnErrNum: 0,
 			executedSessionInit: ref sessionStarted,
-			err: ref loginError);
+			err: ref error);
 
-		if (sessionId == 0 || sessionStarted == 0)
+		if (session == 0 || sessionStarted == 0)
 		{
-			session = 0;
-			error = loginError.WrapError();
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
-		session = sessionId;
-		error = null;
-		return true;
+		return session;
 	}
 
-	public static bool LoginEncrypted(
+	public static GciSession LoginEncrypted(
 		ReadOnlySpan<byte> stoneName,
 		ReadOnlySpan<byte> hostUsername,
 		ReadOnlySpan<byte> hostPassword,
 		ReadOnlySpan<byte> gemService,
 		ReadOnlySpan<byte> username,
-		ReadOnlySpan<byte> password,
-		[NotNullWhen(true)] out GciSession? session,
-		[NotNullWhen(false)] out GemBuilderErrorInformation? error)
+		ReadOnlySpan<byte> password)
 	{
-		var sessionStarted = 0;
-		GciErrSType loginError = new();
+		GciErrSType error = new();
 
-		var sessionId = Methods.GciTsLogin(
+		var sessionStarted = 0;
+		var session = Methods.GciTsLogin(
 			StoneNameNrs: stoneName,
 			HostUserId: hostUsername,
 			HostPassword: hostPassword,
@@ -437,21 +401,17 @@ public static class FFI
 			loginFlags: LoginFlags.GCI_LOGIN_PW_ENCRYPTED | LoginFlags.GCI_LOGIN_QUIET,
 			haltOnErrNum: 0,
 			executedSessionInit: ref sessionStarted,
-			err: ref loginError);
+			err: ref error);
 
-		if (sessionId == 0 || sessionStarted == 0)
+		if (session == 0 || sessionStarted == 0)
 		{
-			session = 0;
-			error = loginError.WrapError();
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
-		session = sessionId;
-		error = null;
-		return true;
+		return session;
 	}
 
-	public static bool LoginX509(
+	public static GciSession LoginX509(
 		ReadOnlySpan<byte> netldiHostOrIp,
 		ReadOnlySpan<byte> netldiNameOrPort,
 		ReadOnlySpan<byte> privateKey,
@@ -460,16 +420,15 @@ public static class FFI
 		ReadOnlySpan<byte> extraGemArgs,
 		ReadOnlySpan<byte> dirArg,
 		ReadOnlySpan<byte> logArg,
-		bool argsArePemStrings, // TODO: Might be able to parse the args for this one
-		[NotNullWhen(true)] out GciSession? session,
-		[NotNullWhen(false)] out GemBuilderErrorInformation? error)
+		bool argsArePemStrings // TODO: Might be able to parse the args for this one
+		)
 	{
 		// TODO: Come back to this utter calamity.
 
-		var sessionStarted = 0;
-		GciErrSType loginError = new();
-		GciSession sessionId;
+		GciErrSType error = new();
 
+		var sessionStarted = 0;
+		GciSession session;
 		unsafe
 		{
 #pragma warning disable RCS1001 // Add braces (when expression spans over multiple lines)
@@ -497,161 +456,145 @@ public static class FFI
 					executedSessionInit = 0,
 				};
 
-				sessionId = Methods.GciTsX509Login(ref loginArgs, ref sessionStarted, ref loginError);
+				session = Methods.GciTsX509Login(ref loginArgs, ref sessionStarted, ref error);
 			}
 #pragma warning restore RCS1001 // Add braces (when expression spans over multiple lines)
 		}
 
-		if (sessionId == 0 || sessionStarted == 0)
+		if (session == 0 || sessionStarted == 0)
 		{
-			session = 0;
-			error = loginError.WrapError();
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
-		session = sessionId;
-		error = null;
-		return true;
+		return session;
 	}
 
-	public static void Logout(GemBuilderSession session)
+	public static void Logout(GciSession session)
 	{
 		GciErrSType error = new();
 
-		if (Methods.GciTsLogout(session.SessionId, ref error) == 0)
+		if (Methods.GciTsLogout(session, ref error) == 0)
 		{
-			session.AddError(ref error);
+			ThrowHelper.GenericFFIException(ref error);
 		}
 	}
 
-	public static Oop NewFloat(GemBuilderSession session, double num)
+	public static Oop NewFloat(GciSession session, double num)
 	{
 		GciErrSType error = new();
 
-		var floatOop = Methods.GciTsDoubleToOop(session.SessionId, num, ref error);
+		var floatOop = Methods.GciTsDoubleToOop(session, num, ref error);
 		if (floatOop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return ReservedOops.OOP_ILLEGAL;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return floatOop;
 	}
 
-	public static Oop NewLargeInteger(GemBuilderSession session, long num)
+	public static Oop NewLargeInteger(GciSession session, long num)
 	{
 		GciErrSType error = new();
 
-		var longOop = Methods.GciTsI64ToOop(session.SessionId, num, ref error);
+		var longOop = Methods.GciTsI64ToOop(session, num, ref error);
 		if (longOop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return ReservedOops.OOP_ILLEGAL;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return longOop;
 	}
 
-	public static Oop NewSingleByteString(GemBuilderSession session, ReadOnlySpan<byte> bytes)
+	public static Oop NewSingleByteString(GciSession session, ReadOnlySpan<byte> bytes)
 	{
 		GciErrSType error = new();
 
-		var stringOop = Methods.GciTsNewString_(session.SessionId, bytes, (ulong)bytes.Length, ref error);
+		var stringOop = Methods.GciTsNewString_(session, bytes, (ulong)bytes.Length, ref error);
 		if (stringOop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return ReservedOops.OOP_ILLEGAL;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return stringOop;
 	}
 
-	public static Oop NewString(GemBuilderSession session, ReadOnlySpan<ushort> bytes)
+	public static Oop NewString(GciSession session, ReadOnlySpan<ushort> bytes)
 	{
 		GciErrSType error = new();
 
-		var stringOop = Methods.GciTsNewUnicodeString_(session.SessionId, bytes, (ulong)bytes.Length, ref error);
+		var stringOop = Methods.GciTsNewUnicodeString_(session, bytes, (ulong)bytes.Length, ref error);
 		if (stringOop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
-			return ReservedOops.OOP_ILLEGAL;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return stringOop;
 	}
 
-	public static bool PersistObjects(GemBuilderSession session, ReadOnlySpan<Oop> oops)
+	public static bool PersistObjects(GciSession session, ReadOnlySpan<Oop> oops)
 	{
 		GciErrSType error = new();
 
-		var bufferEntirelyProcessed = Methods.GciTsSaveObjs(session.SessionId, oops, oops.Length, ref error);
+		var bufferEntirelyProcessed = Methods.GciTsSaveObjs(session, oops, oops.Length, ref error);
 		if (bufferEntirelyProcessed == 0)
 		{
-			session.AddError(ref error);
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return true;
 	}
 
-	public static bool? PollForNonBlockingResult(GemBuilderSession session)
+	public static bool? PollForNonBlockingResult(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var result = Methods.GciTsNbPoll(session.SessionId, 10, ref error);
-
+		var result = Methods.GciTsNbPoll(session, 10, ref error);
 		if (result == -1)
 		{
-			session.AddError(ref error);
-			return null;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return result == 1;
 	}
 
-	public static Oop ResolveSymbol(GemBuilderSession session, ReadOnlySpan<byte> name)
+	public static Oop ResolveSymbol(GciSession session, ReadOnlySpan<byte> name)
 	{
 		GciErrSType error = new();
 
-		var oop = Methods.GciTsResolveSymbol(session.SessionId, name, ReservedOops.OOP_NIL, ref error);
+		var oop = Methods.GciTsResolveSymbol(session, name, ReservedOops.OOP_NIL, ref error);
 		if (oop == ReservedOops.OOP_ILLEGAL)
 		{
-			session.AddError(ref error);
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		return oop;
 	}
 
-	public static void SoftBreak(GemBuilderSession session)
+	public static void SoftBreak(GciSession session)
 	{
 		GciErrSType error = new();
 
-		var result = Methods.GciTsBreak(session.SessionId, 0, ref error);
-
+		var result = Methods.GciTsBreak(session, 0, ref error);
 		if (result == 0)
 		{
-			session.AddError(ref error);
+			ThrowHelper.GenericFFIException(ref error);
 		}
 	}
 
-	public static bool TryGetObjectInfo(GemBuilderSession session, Oop root, out GciTsObjInfo objectInfo)
+	public static bool TryGetObjectInfo(GciSession session, Oop root, out GciTsObjInfo objectInfo)
 	{
 		GciErrSType error = new();
+
 		GciTsObjInfo localObjInfo = new();
-
 		int64 fetchSuccessful;
-
 		unsafe
 		{
-			fetchSuccessful = Methods
-			   .GciTsFetchObjInfo(session.SessionId, root, 0, ref localObjInfo, null, 0, ref error);
+			fetchSuccessful = Methods.GciTsFetchObjInfo(session, root, 0, ref localObjInfo, null, 0, ref error);
 		}
 
 		if (fetchSuccessful == -1)
 		{
-			session.AddError(ref error);
-			objectInfo = default;
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		objectInfo = localObjInfo;
@@ -659,23 +602,22 @@ public static class FFI
 	}
 
 	public static bool TryGetObjectInfoWithStringBuffer(
-		GemBuilderSession session,
+		GciSession session,
 		Oop root,
 		out GciTsObjInfo objectInfo,
 		Span<byte> buffer,
 		out ReadOnlySpan<byte> stringBuffer)
 	{
 		GciErrSType error = new();
+
 		GciTsObjInfo localObjInfo = new();
-
 		int64 bytesWritten;
-
 		unsafe
 		{
 			fixed (byte* bufferPtr = &buffer.GetPinnableReference())
 			{
 				bytesWritten = Methods.GciTsFetchObjInfo(
-					session.SessionId,
+					session,
 					root,
 					1,
 					ref localObjInfo,
@@ -687,10 +629,7 @@ public static class FFI
 
 		if (bytesWritten == -1)
 		{
-			session.AddError(ref error);
-			objectInfo = default;
-			stringBuffer = [];
-			return false;
+			ThrowHelper.GenericFFIException(ref error);
 		}
 
 		objectInfo = localObjInfo;

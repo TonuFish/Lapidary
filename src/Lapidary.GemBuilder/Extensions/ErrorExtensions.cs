@@ -1,10 +1,10 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Lapidary.Extensions;
+namespace Lapidary.GemBuilder.Extensions;
 
 internal static class ErrorExtensions
 {
-	public static GemBuilderErrorInformation WrapError(this GciErrSType error, [CallerMemberName] string source = "")
+	public static GemBuilderErrorInformation WrapError(this ref GciErrSType error, [CallerMemberName] string source = "")
 	{
 		ReadOnlySpan<byte> messageBuffer;
 		ReadOnlySpan<byte> reasonBuffer;
@@ -12,16 +12,17 @@ internal static class ErrorExtensions
 
 		unsafe
 		{
-			var pin = &error;
-
-			messageBuffer = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(pin->message);
-			reasonBuffer = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(pin->reason);
-
-			if (error.argCount > 0)
+			fixed (GciErrSType* pin = &error)
 			{
-				var rawArgs = new ReadOnlySpan<Oop>(pin->args, error.argCount);
-				argsBuffer = new Oop[error.argCount];
-				rawArgs.CopyTo(argsBuffer.AsSpan());
+				messageBuffer = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(pin->message);
+				reasonBuffer = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(pin->reason);
+
+				if (error.argCount > 0)
+				{
+					var rawArgs = new ReadOnlySpan<Oop>(pin->args, error.argCount);
+					argsBuffer = new Oop[error.argCount];
+					rawArgs.CopyTo(argsBuffer.AsSpan());
+				}
 			}
 		}
 

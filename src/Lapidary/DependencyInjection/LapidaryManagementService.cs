@@ -105,20 +105,15 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 		Encoding.UTF8.GetBytes(gemService, gemServiceBuffer);
 		gemServiceBuffer[^1] = 0;
 
-		if (!FFI.Login(
+		var sessionId = FFI.Login(
 			stoneName: stoneNameBuffer,
 			hostUsername: hostUsernameBuffer,
 			hostPassword: hostPasswordBuffer,
 			gemService: gemServiceBuffer,
 			username: usernameBuffer,
-			password: passwordBuffer,
-			session: out var sessionId,
-			error: out var error))
-		{
-			ThrowHelper.GenericExceptionToDetailLater();
-		}
+			password: passwordBuffer);
 
-		GemBuilderSession session = new(sessionId.Value)
+		GemBuilderSession session = new(sessionId)
 		{
 			Bucket = database
 		};
@@ -165,20 +160,15 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 		Encoding.UTF8.GetBytes(gemService, gemServiceBuffer);
 		gemServiceBuffer[^1] = 0;
 
-		if (!FFI.LoginEncrypted(
+		var sessionId = FFI.LoginEncrypted(
 			stoneName: stoneNameBuffer,
 			hostUsername: hostUsernameBuffer,
 			hostPassword: hostPasswordBuffer,
 			gemService: gemServiceBuffer,
 			username: credentials.Username.Span,
-			password: credentials.Password.Span,
-			session: out var sessionId,
-			error: out var error))
-		{
-			ThrowHelper.GenericExceptionToDetailLater();
-		}
+			password: credentials.Password.Span);
 
-		GemBuilderSession session = new(sessionId.Value)
+		GemBuilderSession session = new(sessionId)
 		{
 			Bucket = database
 		};
@@ -210,7 +200,7 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 		var dirArgBuffer = JustAllocateTheBuffer(credentials.DirArg);
 		var logArgBuffer = JustAllocateTheBuffer(credentials.LogArg);
 
-		if (!FFI.LoginX509(
+		var sessionId = FFI.LoginX509(
 			netldiHostOrIp: netldiHostOrIpBuffer,
 			netldiNameOrPort: netldiNameOrPortBuffer,
 			privateKey: privateKeyBuffer,
@@ -219,14 +209,9 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 			extraGemArgs: extraGemArgsBuffer,
 			dirArg: dirArgBuffer,
 			logArg: logArgBuffer,
-			argsArePemStrings: credentials.ArgsArePemStrings,
-			session: out var sessionId,
-			error: out var error))
-		{
-			ThrowHelper.GenericExceptionToDetailLater();
-		}
+			argsArePemStrings: credentials.ArgsArePemStrings);
 
-		GemBuilderSession session = new(sessionId.Value)
+		GemBuilderSession session = new(sessionId)
 		{
 			Bucket = database
 		};

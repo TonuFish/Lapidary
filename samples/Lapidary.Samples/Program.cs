@@ -13,6 +13,6 @@ internal static class Program
 	[ModuleInitializer]
 	internal static void Init()
 	{
-		GemBuilder.OnModuleLoad.EnsureGemBuilderFilesExist(AppContext.BaseDirectory);
+		OnModuleLoad.EnsureGemBuilderFilesExist(AppContext.BaseDirectory);
 	}
 }

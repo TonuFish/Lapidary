@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using Lapidary.Converters;
-using Lapidary.GemBuilder.Definitions;
 
 namespace Lapidary.Core;
 
@@ -41,18 +40,15 @@ internal sealed class GemBuilderSession
 			: null;
 	}
 
+	#region VERY TEMPORARY IMPLICIT CONVERSION
+
+	public static implicit operator GciSession(GemBuilderSession session) => session.SessionId;
+
+	#endregion VERY TEMPORARY IMPLICIT CONVERSION
+
 	#region "Error Handling" (TEMPORARY CODE)
 
 	private readonly Lock _errorLock = new();
-
-	internal void AddError(ref GciErrSType error, [CallerMemberName] string source = "")
-	{
-		var wrappedError = error.WrapError(source);
-		lock (_errorLock)
-		{
-			_errors.Enqueue(wrappedError);
-		}
-	}
 
 	internal bool TryGetError([NotNullWhen(true)] out GemBuilderErrorInformation? error)
 	{

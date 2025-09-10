@@ -1,11 +1,10 @@
-﻿using Lapidary.GemBuilder;
-using Lapidary.GemBuilder.DependencyInjection;
+﻿using Lapidary.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Lapidary.Samples;
 
-public static class BasicExample
+internal static class BasicExample
 {
 	public static void Foo()
 	{
