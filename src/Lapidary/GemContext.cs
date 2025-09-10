@@ -1,6 +1,4 @@
-﻿using Lapidary.GemBuilder.Definitions;
-
-namespace Lapidary;
+﻿namespace Lapidary;
 
 public sealed partial class GemContext
 {

@@ -1,7 +1,4 @@
-﻿using Lapidary.GemBuilder.Core;
-using Lapidary.GemBuilder.Definitions;
-
-namespace Lapidary.Converters.Temporary;
+﻿namespace Lapidary.Converters.Temporary;
 
 internal sealed class IntegerConverter : LapidaryNumberConverter<long>
 {
