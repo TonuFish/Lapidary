@@ -153,7 +153,7 @@ public static class FFI
 		return true;
 	}
 
-	public static Oop ForeignPerform(
+	public static Oop Perform(
 		GciSession session,
 		Oop root,
 		ReadOnlySpan<byte> selector,
@@ -179,7 +179,7 @@ public static class FFI
 		return oop;
 	}
 
-	public static bool ForeignPerformNonBlocking(
+	public static bool PerformNonBlocking(
 		GciSession session,
 		Oop root,
 		ReadOnlySpan<byte> selector,

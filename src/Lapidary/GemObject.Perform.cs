@@ -8,7 +8,7 @@ public readonly ref partial struct GemObject
 {
 	public readonly GemObject Perform(ReadOnlySpan<byte> selector)
 	{
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, ReadOnlySpan<Oop>.Empty));
+		return new(Session, FFI.Perform(Session, Oop, selector, ReadOnlySpan<Oop>.Empty));
 	}
 
 	public readonly GemObject Perform<T0>(
@@ -17,7 +17,7 @@ public readonly ref partial struct GemObject
 		where T0 : allows ref struct
 	{
 		Span<Oop> args = [ConvertArgument(arg0),];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1>(
@@ -28,7 +28,7 @@ public readonly ref partial struct GemObject
 		where T1 : allows ref struct
 	{
 		Span<Oop> args = [ConvertArgument(arg0), ConvertArgument(arg1),];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2>(
@@ -41,7 +41,7 @@ public readonly ref partial struct GemObject
 		where T2 : allows ref struct
 	{
 		Span<Oop> args = [ConvertArgument(arg0), ConvertArgument(arg1), ConvertArgument(arg2),];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3>(
@@ -62,7 +62,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg2),
 			ConvertArgument(arg3),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4>(
@@ -86,7 +86,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg3),
 			ConvertArgument(arg4),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5>(
@@ -113,7 +113,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg4),
 			ConvertArgument(arg5),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6>(
@@ -143,7 +143,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg5),
 			ConvertArgument(arg6),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7>(
@@ -176,7 +176,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg6),
 			ConvertArgument(arg7),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8>(
@@ -212,7 +212,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg7),
 			ConvertArgument(arg8),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
@@ -251,7 +251,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg8),
 			ConvertArgument(arg9),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
@@ -293,7 +293,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg9),
 			ConvertArgument(arg10),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
@@ -338,7 +338,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg10),
 			ConvertArgument(arg11),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
@@ -386,7 +386,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg11),
 			ConvertArgument(arg12),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
@@ -437,7 +437,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg12),
 			ConvertArgument(arg13),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
@@ -491,7 +491,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg13),
 			ConvertArgument(arg14),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	public readonly GemObject Perform<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
@@ -548,7 +548,7 @@ public readonly ref partial struct GemObject
 			ConvertArgument(arg14),
 			ConvertArgument(arg15),
 		];
-		return new(Session, FFI.ForeignPerform(Session, Oop, selector, args));
+		return new(Session, FFI.Perform(Session, Oop, selector, args));
 	}
 
 	private readonly Oop ConvertArgument<TArg>(TArg argument) where TArg : allows ref struct
