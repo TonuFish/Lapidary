@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="samples/Lapidary.Samples/Lapidary.Samples.csproj" />
+  <Project Path="src/Lapidary.GemBuilder/Lapidary.GemBuilder.csproj" />
+  <Project Path="src/Lapidary/Lapidary.csproj" />
+</Solution>
