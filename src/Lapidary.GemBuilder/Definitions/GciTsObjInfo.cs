@@ -7,29 +7,29 @@
 /// <remarks>
 /// gcits.ht
 /// </remarks>
-internal ref struct GciTsObjInfo
+public ref struct GciTsObjInfo
 {
-	internal readonly bool IsIndexable => _bits == BitsMask.indexable_mask;
-	internal readonly bool IsInvariant => _bits == BitsMask.invariant_mask;
-	internal readonly bool IsOverlayed => _bits == BitsMask.overlay_mask;
-	internal readonly bool IsPartial => _bits == BitsMask.partial_mask;
+	public readonly bool IsIndexable => _bits == BitsMask.indexable_mask;
+	public readonly bool IsInvariant => _bits == BitsMask.invariant_mask;
+	public readonly bool IsOverlayed => _bits == BitsMask.overlay_mask;
+	public readonly bool IsPartial => _bits == BitsMask.partial_mask;
 
-	internal OopType objId;
+	public OopType objId;
 
 	/// <summary>
 	/// OOP of the class of the obj.
 	/// </summary>
-	internal OopType objClass;
+	public OopType objClass;
 
 	/// <summary>
 	/// Obj's total size, in bytes or OOPs.
 	/// </summary>
-	internal int64 objSize;
+	public int64 objSize;
 
 	/// <summary>
 	/// Num of named inst vars in the obj.
 	/// </summary>
-	internal int namedSize;
+	public int namedSize;
 
 	/// <summary>
 	/// <list type="bullet">
@@ -38,10 +38,10 @@ internal ref struct GciTsObjInfo
 	/// <item>2 write allowed</item>
 	/// </list>
 	/// </summary>
-	internal uint access;
+	public uint access;
 
-	internal ushort objectSecurityPolicyId;
-	internal BitsMask _bits;
+	public ushort objectSecurityPolicyId;
+	public BitsMask _bits;
 
 	public GciTsObjInfo()
 	{
@@ -54,12 +54,12 @@ internal ref struct GciTsObjInfo
 		_bits = 0;
 	}
 
-	internal readonly GciByteSwizEType ByteSwizKind()
+	public readonly GciByteSwizEType ByteSwizKind()
 	{
 		return (GciByteSwizEType)((ushort)(_bits & BitsMask.swiz_kind_mask) >> 8);
 	}
 
-	internal readonly byte ObjImpl()
+	public readonly byte ObjImpl()
 	{
 		return (byte)((ushort)_bits & 3); // GC_IMPLEMENTATION_MASK
 	}

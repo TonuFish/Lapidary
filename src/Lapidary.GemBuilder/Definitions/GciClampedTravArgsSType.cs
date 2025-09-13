@@ -6,14 +6,14 @@
 /// <remarks>
 /// gcicmn.ht
 /// </remarks>
-internal unsafe struct GciClampedTravArgsSType
+public unsafe struct GciClampedTravArgsSType
 {
-	internal OopType clampSpec;
-	internal OopType resultOop; /* Result of GciPerformTrav/GciExecuteStrTrav */
-	internal GciTravBufType* travBuff;
-	internal int level;
-	internal int retrievalFlags;
-	internal BoolType isRpc; /* private, for use by implementation of GCI */
+	public OopType clampSpec;
+	public OopType resultOop; /* Result of GciPerformTrav/GciExecuteStrTrav */
+	public GciTravBufType* travBuff;
+	public int level;
+	public int retrievalFlags;
+	public BoolType isRpc; /* private, for use by implementation of GCI */
 
 	public GciClampedTravArgsSType()
 	{
@@ -32,12 +32,12 @@ internal unsafe struct GciClampedTravArgsSType
 /// <remarks>
 /// gcicmn.ht
 /// </remarks>
-internal unsafe struct GciTravBufType
+public unsafe struct GciTravBufType
 {
 	// TODO: Revisit this around the size of body................
 
-	internal uint allocatedBytes;
-	internal uint usedBytes;
+	public uint allocatedBytes;
+	public uint usedBytes;
 	// TODO: Migrate fixed arrays to InlineArray
-	internal fixed ByteType body[8];
+	public fixed ByteType body[8];
 }

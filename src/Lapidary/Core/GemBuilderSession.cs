@@ -1,0 +1,89 @@
+﻿using System.Threading;
+using Lapidary.Converters;
+
+namespace Lapidary.Core;
+
+internal sealed class GemBuilderSession
+{
+	internal DatabaseBucket Bucket { get; }
+	internal GciSession Session { get; }
+
+	private readonly Queue<GemBuilderErrorInformation> _errors = new();
+
+	internal GemBuilderSession(GciSession session, DatabaseBucket bucket)
+	{
+		Bucket = bucket;
+		Session = session;
+	}
+
+	internal ILapidaryConverter? GetClassConverter(Type targetType, Oop classOop)
+	{
+		// TODO: Clarify null safety after restructure.
+		return Bucket.ClassConverters!.TryGetValue(new(classOop, targetType), out var converter)
+			? converter
+			: null;
+	}
+
+	internal ILapidaryConverter? GetNumberConverter(Oop numberOop)
+	{
+		// TODO: Clarify null safety after restructure.
+		return Bucket.NumberConverters!.TryGetValue(numberOop, out var converter)
+			? converter
+			: null;
+	}
+
+	internal ILapidaryConverter? GetStructConverter(Type targetType, Oop structOop)
+	{
+		// TODO: Clarify null safety after restructure.
+		return Bucket.StructConverters!.TryGetValue(new(structOop, targetType), out var converter)
+			? converter
+			: null;
+	}
+
+	#region VERY TEMPORARY IMPLICIT CONVERSION
+
+	public static implicit operator GciSession(GemBuilderSession session) => session.Session;
+
+	#endregion VERY TEMPORARY IMPLICIT CONVERSION
+
+	#region "Error Handling" (TEMPORARY CODE)
+
+	private readonly Lock _errorLock = new();
+
+	internal bool TryGetError([NotNullWhen(true)] out GemBuilderErrorInformation? error)
+	{
+		bool hadError;
+		GemBuilderErrorInformation? errorInformation;
+
+		lock (_errorLock)
+		{
+			hadError = _errors.TryDequeue(out errorInformation);
+		}
+
+		if (hadError)
+		{
+			error = errorInformation!;
+			return true;
+		}
+
+		error = null;
+		return false;
+	}
+
+	internal GemBuilderErrorInformation[] GetAllErrors()
+	{
+		if (_errors.Count == 0)
+		{
+			return [];
+		}
+
+		lock (_errorLock)
+		{
+			var errors = _errors.ToArray();
+			_errors.Clear();
+			return errors;
+		}
+	}
+
+	#endregion "Error Handling" (TEMPORARY CODE)
+}

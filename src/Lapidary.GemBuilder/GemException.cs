@@ -3,15 +3,17 @@
 // TODO: Unseal and specialise exceptions.
 public sealed class GemException : Exception
 {
-    public GemException() : base()
-    {
-    }
+	public required GemBuilderErrorInformation Error { get; init; }
 
-    public GemException(string? message) : base(message)
-    {
-    }
+	public GemException() : base()
+	{
+	}
 
-    public GemException(string? message, Exception? innerException) : base(message, innerException)
-    {
-    }
+	public GemException(string? message) : base(message)
+	{
+	}
+
+	public GemException(string? message, Exception? innerException) : base(message, innerException)
+	{
+	}
 }

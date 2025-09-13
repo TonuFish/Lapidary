@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<LangVersion>latest</LangVersion>
+		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
 		<TargetFramework>net9.0</TargetFramework>
 	</PropertyGroup>

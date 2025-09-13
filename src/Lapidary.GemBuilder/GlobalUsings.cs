@@ -1,10 +1,8 @@
 ﻿global using System;
-global using System.Collections.Generic;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Runtime.CompilerServices;
 global using Lapidary.GemBuilder.Core;
 global using Lapidary.GemBuilder.Definitions;
-global using Lapidary.GemBuilder.Extensions;
 
 global using Oop = System.UInt64;
 

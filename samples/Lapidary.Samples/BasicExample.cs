@@ -1,11 +1,10 @@
-﻿using Lapidary.GemBuilder;
-using Lapidary.GemBuilder.DependencyInjection;
+﻿using Lapidary.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Lapidary.Samples;
 
-public static class BasicExample
+internal static class BasicExample
 {
 	public static void Foo()
 	{
@@ -42,16 +41,7 @@ public static class BasicExample
 		var factory = host.Services.GetRequiredService<IGemContextFactory>();
 		var context = factory.GetContext(userSession);
 
-		// User your connection.
-
-		// Look up DateTime class
-		// Call now on it
-		// Do it raw
-		// Compare they're equal
-
-		// Add year and days in year together
-		// Print results
-
+		// Use your connection.
 		var aObject = context.PerformSmalltalkRaw("72"u8);
 		var bObject = context.PerformSmalltalkRaw("43"u8);
 		var result = aObject.Perform("+"u8, bObject);
