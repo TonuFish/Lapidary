@@ -38,7 +38,7 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 
 	// TODO: Login overhaul - credentials and login methods.
 
-	public EncryptedLoginCredentials EncryptCredentials(LoginCredentials loginBucket)
+	public EncryptedLoginCredentials EncryptCredentials(BasicLoginCredentials loginBucket)
 	{
 		var bufferSize = Encoding.UTF8.GetByteCount(loginBucket.Password);
 
@@ -60,7 +60,7 @@ internal sealed class LapidaryManagementService : ILapidaryManagementService
 		return new(usernameBuffer, encryptedBuffer.Value);
 	}
 
-	public SessionIdentifier Login(DatabaseIdentifier identifier, LoginCredentials credentials)
+	public SessionIdentifier Login(DatabaseIdentifier identifier, BasicLoginCredentials credentials)
 	{
 		if (!_databaseConfigurations.TryGetValue(identifier, out var database))
 		{

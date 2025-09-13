@@ -33,7 +33,7 @@ public ref struct GciTsGbjInfo
 	public readonly bool IsUtf16 => (extraBits & (uint64)ExtraBits.is_utf16) > 0;
 	public readonly bool IsUnicode => ((extraBits >> 17) & (uint64)ExtraBits.strInfo_icuString) > 0;
 
-	public uint64 CharSize()
+	public readonly uint64 CharSize()
 	{
 		return (extraBits >> 17) & (uint64)ExtraBits.strInfo_ChrSize;
 	}
@@ -93,6 +93,7 @@ public ref struct GciTsGbjInfo
 
 	public readonly GciByteSwizEType ByteSwizKind()
 	{
+		// TODO: This seems sus, look into it more later.
 		return (GciByteSwizEType)((ushort)(_bits & BitsMask.swiz_kind_mask) >> 8);
 	}
 

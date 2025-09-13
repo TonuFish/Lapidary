@@ -9,8 +9,8 @@ public interface ILapidaryManagementService
         DatabaseConnectionCredentials connection,
         IList<ILapidaryConverter>? converters = null);
 
-    public EncryptedLoginCredentials EncryptCredentials(LoginCredentials loginBucket);
-    public SessionIdentifier Login(DatabaseIdentifier identifier, LoginCredentials credentials);
+    public EncryptedLoginCredentials EncryptCredentials(BasicLoginCredentials loginBucket);
+    public SessionIdentifier Login(DatabaseIdentifier identifier, BasicLoginCredentials credentials);
     public SessionIdentifier LoginEncrypted(DatabaseIdentifier identifier, EncryptedLoginCredentials credentials);
     public void Logout(SessionIdentifier sessionIdentifier);
 

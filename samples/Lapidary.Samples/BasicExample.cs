@@ -41,16 +41,7 @@ internal static class BasicExample
 		var factory = host.Services.GetRequiredService<IGemContextFactory>();
 		var context = factory.GetContext(userSession);
 
-		// User your connection.
-
-		// Look up DateTime class
-		// Call now on it
-		// Do it raw
-		// Compare they're equal
-
-		// Add year and days in year together
-		// Print results
-
+		// Use your connection.
 		var aObject = context.PerformSmalltalkRaw("72"u8);
 		var bObject = context.PerformSmalltalkRaw("43"u8);
 		var result = aObject.Perform("+"u8, bObject);

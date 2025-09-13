@@ -6,6 +6,7 @@ namespace Lapidary;
 
 public sealed partial class GemContext
 {
+	// TODO: Actually finish this...
 	// TODO: Exception types here.
 
 	public bool NonBlockingCallInProgress()
@@ -24,15 +25,20 @@ public sealed partial class GemContext
 
 	internal void ClearNonBlockingCall()
 	{
-		// Break to cancel the call, then cleanup by "getting" the result.
-		FFI.SoftBreak(Session);
-		// TODO: Should have a no-wait FFI get call.
-		var oop = FFI.BlockForNonBlockingResult(Session);
-		if (oop != ReservedOops.OOP_ILLEGAL
-			|| !Session.TryGetError(out var error)
-			|| error.Number != 6003)
+		try
 		{
+			// Break to cancel the call, then cleanup by "getting" the result.
+			FFI.SoftBreak(Session);
+			// TODO: Should have a no-wait FFI get call.
+			_ = FFI.BlockForNonBlockingResult(Session);
 			throw new InvalidOperationException("!! Async cancellation errored by something other than soft break.");
+		}
+		catch (GemException ex)
+		{
+			if (ex.Error.Number != 6003)
+			{
+				throw new InvalidOperationException("!! Async cancellation errored by something other than soft break.", ex);
+			}
 		}
 	}
 
@@ -43,13 +49,14 @@ public sealed partial class GemContext
 
 	internal GemObject GetNonBlockingResult()
 	{
-		var oop = FFI.BlockForNonBlockingResult(Session);
-
-		if (oop == ReservedOops.OOP_ILLEGAL)
+		try
 		{
-			_ = Session.TryGetError(out var error);
+			return new(Session, FFI.BlockForNonBlockingResult(Session));
 
-			if (error!.Number is not 6003 and not 6004)
+		}
+		catch (GemException ex)
+		{
+			if (ex.Error.Number is not 6003 and not 6004)
 			{
 				// TODO: Quick hack reference - 6003 = SoftBreak, 6004 HardBreak.
 				// If it's neither of these, it's real and fatal.
@@ -58,8 +65,6 @@ public sealed partial class GemContext
 
 			throw new InvalidOperationException("!! Async result after pooling killed by break.");
 		}
-
-		return new(Session, oop);
 	}
 
 	internal void SoftBreak()

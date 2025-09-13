@@ -3,7 +3,7 @@ using Lapidary.Converters.Temporary;
 using System.Collections.Frozen;
 using System.Text;
 
-namespace Lapidary;
+namespace Lapidary.Core;
 
 internal sealed class DatabaseBucket
 {
