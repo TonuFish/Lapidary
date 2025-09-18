@@ -13,7 +13,10 @@
 
 	<PropertyGroup Label="Analysers">
 		<AnalysisLevel>latest-all</AnalysisLevel>
+		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 		<IsAotCompatible>true</IsAotCompatible>
+		<TrimmerSingleWarn>false</TrimmerSingleWarn>
+		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
 	</PropertyGroup>
 
 	<ItemGroup Label="Solution-wide Code">

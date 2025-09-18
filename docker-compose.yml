@@ -1,0 +1,9 @@
+name: "Lapidary"
+services:
+  db:
+    container_name: "LapidaryGemstone"
+    build:
+      context: ./environment
+    ports:
+      - "50376:22"
+      - "50377:50377"
