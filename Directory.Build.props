@@ -11,19 +11,23 @@
 		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
 	</PropertyGroup>
 
-	<PropertyGroup Label="Analysers">
-		<AnalysisLevel>latest-all</AnalysisLevel>
-		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-		<IsAotCompatible>true</IsAotCompatible>
-		<TrimmerSingleWarn>false</TrimmerSingleWarn>
-		<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
-	</PropertyGroup>
-
-	<ItemGroup Label="Solution-wide Code">
-		<Compile Include="$(SolutionDir)\ModuleSettings.cs" Visible="false" />
-	</ItemGroup>
-
 	<ItemGroup Label="GemBuilder Files">
 		<Content Include="$(SolutionDir)\GemBuilderFiles\*.*" CopyToOutputDirectory="PreserveNewest" Visible="false" />
 	</ItemGroup>
+
+	<Choose>
+		<When Condition="$(ProjectName.Contains('Tests')) == 'False'">
+			<PropertyGroup Label="Analysers">
+				<AnalysisLevel>latest-all</AnalysisLevel>
+				<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+				<IsAotCompatible>true</IsAotCompatible>
+				<TrimmerSingleWarn>false</TrimmerSingleWarn>
+				<SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+			</PropertyGroup>
+
+			<ItemGroup>
+				<Compile Include="$(SolutionDir)\ModuleSettings.cs" Visible="false" />
+			</ItemGroup>
+		</When>
+	</Choose>
 </Project>
