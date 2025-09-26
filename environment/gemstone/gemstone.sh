@@ -35,6 +35,8 @@ gslist -cvl			# list GemStone servers
 ssh-keygen -A
 sudo service ssh --full-restart
 
+/opt/gemstone/product/bin/topaz -i -S /opt/gemstone/seed.topaz
+
 # wait forever
 while true
 do

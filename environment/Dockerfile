@@ -49,6 +49,7 @@ COPY --chown=gemstone:users gemstone/locks $GEMSTONE_GLOBAL_DIR/locks
 COPY --chown=gemstone:users gemstone/log $GEMSTONE_GLOBAL_DIR/log
 COPY --chown=gemstone:users gemstone/gemstone.sh $GEMSTONE_GLOBAL_DIR/gemstone.sh
 COPY --chown=gemstone:users gemstone/Classes /srv/Lapidary/Classes
+COPY --chown=gemstone:users gemstone/seed.topaz $GEMSTONE_GLOBAL_DIR/seed.topaz
 
 EXPOSE 50377
 CMD ["./gemstone.sh"]
