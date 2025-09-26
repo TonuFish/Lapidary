@@ -13,7 +13,7 @@ public sealed class SomeTests
 	}
 
 	[Fact]
-	public void Foo()
+	public void Placeholder()
 	{
 		var expected = FFI.NewLargeInteger(_fixture.Session, 765);
 		var result = FFI.Execute(_fixture.Session, "765"u8);

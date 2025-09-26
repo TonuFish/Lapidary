@@ -6,7 +6,7 @@ public sealed class LoginTests : IDisposable
 	private GciSession? _session;
 
 	[Fact]
-	public void BasicLogin()
+	public void BasicLogin_WithValidCredentials_Works()
 	{
 		var exception = Record.Exception(() =>
 		{
@@ -22,7 +22,7 @@ public sealed class LoginTests : IDisposable
 	}
 
 	[Fact]
-	public void EncryptedLogin()
+	public void EncryptedLogin_WithValidCredentials_Works()
 	{
 		var encryptedPassword = FFI.Encrypt(Constants.Connection.Password);
 		var ep = Assert.NotNull(encryptedPassword);
