@@ -1,0 +1,6 @@
+output ~/seed.log
+set user DataCurator password swordfish gemstone gs64stone
+login
+input /srv/Lapidary/Classes/LapidaryRoot.gs
+commit
+exit

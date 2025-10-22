@@ -364,3 +364,9 @@ FodyWeavers.xsd
 
 # GemBuilder required files
 GemBuilderFiles/
+
+# GemStone product files
+environment/gemstone/data
+environment/gemstone/product
+environment/gemstone/locks
+environment/gemstone/log

@@ -7,4 +7,5 @@
   <Project Path="samples/Lapidary.Samples/Lapidary.Samples.csproj" />
   <Project Path="src/Lapidary.GemBuilder/Lapidary.GemBuilder.csproj" />
   <Project Path="src/Lapidary/Lapidary.csproj" />
+  <Project Path="test/Lapidary.GemBuilder.Tests/Lapidary.GemBuilder.Tests.csproj" />
 </Solution>
