@@ -18,7 +18,7 @@
 	<Choose>
 		<When Condition="$(ProjectName.Contains('Tests')) == 'False'">
 			<PropertyGroup Label="Analysers">
-				<AnalysisLevel>latest-all</AnalysisLevel>
+				<AnalysisLevel>preview-all</AnalysisLevel>
 				<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 				<IsAotCompatible>true</IsAotCompatible>
 				<TrimmerSingleWarn>false</TrimmerSingleWarn>
