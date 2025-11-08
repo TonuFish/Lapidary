@@ -1,44 +1,53 @@
 ﻿using Lapidary.Converters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lapidary.DependencyInjection;
+
+// TODO: Rename FooBase when specialising multi/single user connections
 
 public abstract class GemStone
 {
 	private readonly ReadOnlyMemory<byte> _gemService;
 	private readonly ReadOnlyMemory<byte> _hostPassword;
 	private readonly ReadOnlyMemory<byte> _hostUserId;
+	private readonly LapidaryProvider _provider;
 	private readonly ReadOnlyMemory<byte> _stoneName;
 
-	private readonly Dictionary<string, LoginData> _logins;
+	private readonly Dictionary<LoginIdentifier, LoginData> _logins;
 
-	protected GemStone(GemStoneConfiguration<GemStone> gemStoneConfiguration)
+	protected GemStone(GemStoneConfiguration gemStoneConfiguration)
 	{
+		ArgumentNullException.ThrowIfNull(gemStoneConfiguration);
+
 		_gemService = gemStoneConfiguration.GemService;
 		_hostPassword = gemStoneConfiguration.HostPassword;
 		_hostUserId = gemStoneConfiguration.HostUserId;
 		_logins = gemStoneConfiguration.Logins;
+		_provider = gemStoneConfiguration.Provider;
 		_stoneName = gemStoneConfiguration.StoneName;
-
 	}
 }
 
-public sealed class GemStoneConfiguration<T>
-	where T : GemStone
+public abstract class GemStoneConfiguration
 {
 	//! Finalised copy of settings. --- Converters are a bit of a `?`
 
 	internal ReadOnlyMemory<byte> GemService { get; init; }
 	internal ReadOnlyMemory<byte> HostPassword { get; init; }
 	internal ReadOnlyMemory<byte> HostUserId { get; init; }
-	internal Dictionary<string, LoginData> Logins { get; init; }
+	internal Dictionary<LoginIdentifier, LoginData> Logins { get; init; }
+	internal LapidaryProvider Provider { get; init; }
 	internal ReadOnlyMemory<byte> StoneName { get; init; }
 
-	internal GemStoneConfiguration()
+	private protected GemStoneConfiguration(LapidaryProvider provider)
+	{
+		Provider = provider;
+	}
+}
+
+public sealed class GemStoneConfiguration<T> : GemStoneConfiguration
+	where T : GemStone
+{
+	internal GemStoneConfiguration(LapidaryProvider provider) : base(provider)
 	{
 	}
 }
@@ -50,24 +59,39 @@ internal sealed class LoginData
 	internal ReadOnlyMemory<byte> Username { get; init; }
 }
 
-public sealed class GemStoneConfigurationBuilder<T>
+public abstract class GemStoneConfigurationBuilderBase
+{
+	private protected readonly List<ILapidaryConverter> _converters = [];
+	private protected readonly GemStoneConfigurationBuilderValidatorBase _validator;
+
+	private protected string? _gemService;
+	private protected string? _hostPassword;
+	private protected string? _hostUserId;
+	private protected bool _skipStandardConverters;
+	private protected string? _stoneName;
+	private protected LoginIdentifier? _validatingIdentifier;
+	private protected ILogin? _validatingLogin;
+
+	private protected GemStoneConfigurationBuilderBase(GemStoneConfigurationBuilderValidatorBase validator)
+	{
+		_validator = validator;
+	}
+}
+
+public sealed class GemStoneConfigurationBuilder<T> : GemStoneConfigurationBuilderBase
 	where T : GemStone
 {
-	private readonly List<ILapidaryConverter> _converters = [];
 	private readonly Dictionary<LoginIdentifier, ILogin> _identifiersToLogins = [];
 
-	private string? _gemService;
-	private string? _hostPassword;
-	private string? _hostUserId;
-	private bool _skipStandardConverters;
-	private string? _stoneName;
-	private LoginIdentifier? _validatingIdentifier;
-	private ILogin? _validatingLogin;
+	public GemStoneConfigurationBuilder() : base(new GemStoneConfigurationBuilderValidator())
+	{
+	}
 
 	public GemStoneConfiguration<T> Build()
 	{
 		// TODO: This.
-		return default;
+		_validator.Validate(this);
+		return new(LapidaryProvider.Instance);
 	}
 
 	public GemStoneConfigurationBuilder<T> ConfigureConnection(
@@ -95,11 +119,14 @@ public sealed class GemStoneConfigurationBuilder<T>
 		return this;
 	}
 
-	public GemStoneConfigurationBuilder<T> WithUserLogins(IEnumerable<KeyValuePair<LoginIdentifier, ILogin>> logins)
+	public GemStoneConfigurationBuilder<T> WithUserLogins(IEnumerable<ILogin> logins)
 	{
-		foreach ((var identifier, var login) in logins)
+		ArgumentNullException.ThrowIfNull(logins);
+
+		foreach (var login in logins)
 		{
-			_ = _identifiersToLogins.TryAdd(identifier, login);
+			// TODO: Consider if failing should throw for clarity - first added takes priority.
+			_ = _identifiersToLogins.TryAdd(login.Identifier, login);
 		}
 		return this;
 	}
@@ -176,11 +203,38 @@ public readonly struct LoginIdentifier : IEquatable<LoginIdentifier>
 
 internal sealed class LapidaryProvider
 {
+	/*
+	 * Per database.
+	 * - Sessions
+	 * - Logins
+	 */
+
+	private readonly Dictionary<Type, DatabaseThing> _asdf = [];
+
 	internal static LapidaryProvider Instance { get; } = new();
 
 	// TODO: DB bucket -> Configs, Sessions, Logins
 
 	private LapidaryProvider()
 	{
+	}
+}
+
+internal sealed class DatabaseThing
+{
+}
+
+public abstract class GemStoneConfigurationBuilderValidatorBase
+{
+	public abstract void Validate<T>(GemStoneConfigurationBuilder<T> builder) where T : GemStone;
+
+	// TODO: Shared validation methods.
+}
+
+internal sealed class GemStoneConfigurationBuilderValidator : GemStoneConfigurationBuilderValidatorBase
+{
+	public override void Validate<T>(GemStoneConfigurationBuilder<T> builder)
+	{
+		throw new NotImplementedException();
 	}
 }

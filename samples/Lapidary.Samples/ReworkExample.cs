@@ -9,6 +9,27 @@ namespace Lapidary.Samples;
 
 internal static class ReworkExample
 {
+	public static void Bar()
+	{
+		var configuration = new GemStoneConfigurationBuilder<FooGemStone>()
+			.ConfigureConnection(
+				gemService: "!tcp@localhost#netldi:50377#task!gemnetobject",
+				stoneName: "!@localhost!gs64stone")
+			.WithConverters(
+			[
+				new FooHalfConverter(),
+			])
+			.SkipStandardConverters()
+			.WithUserLogins(
+			[
+				new BasicLogin(new("foo"), "DataCurator", "swordfish"),
+			])
+			.WithValidatingLogin(identifier: new("foo"))
+			.Build();
+
+		FooGemStone myGsDatabase = new(configuration);
+	}
+
 	public static void Foo()
 	{
 		var hostBuilder = Host.CreateApplicationBuilder();
@@ -25,7 +46,7 @@ internal static class ReworkExample
 				.SkipStandardConverters()
 				.WithUserLogins(
 					[
-						new(new("foo"), new BasicLogin(new("foo"), "DataCurator", "swordfish")),
+						new BasicLogin(new("foo"), "DataCurator", "swordfish"),
 					])
 				.WithValidatingLogin(identifier: new("foo")));
 
@@ -35,9 +56,9 @@ internal static class ReworkExample
 	}
 }
 
-public class FooGemStone : GemStone
+public sealed class FooGemStone : GemStone
 {
-	public FooGemStone(GemStoneConfiguration<GemStone> gemStoneConfiguration) : base(gemStoneConfiguration)
+	public FooGemStone(GemStoneConfiguration<FooGemStone> gemStoneConfiguration) : base(gemStoneConfiguration)
 	{
 	}
 }

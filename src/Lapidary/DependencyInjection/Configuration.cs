@@ -18,12 +18,14 @@ public static class Configuration
 		Action<GemStoneConfigurationBuilder<T>> configurationBuilderAction)
 		where T : GemStone
 	{
+		ArgumentNullException.ThrowIfNull(configurationBuilderAction);
+
 		services.TryAddSingleton(LapidaryProvider.Instance);
 
 		GemStoneConfigurationBuilder<T> configurationBuilder = new();
 		configurationBuilderAction(configurationBuilder);
 
-		// TODO: Validate the builder.
+		// TODO: Validate builder.
 
 		var configuration = configurationBuilder.Build();
 
