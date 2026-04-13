@@ -2,29 +2,29 @@
 
 public sealed class PersistentGemObject : IEquatable<PersistentGemObject>
 {
-    internal Oop Oop { get; init; }
+	internal Oop Oop { get; init; }
 
-    internal PersistentGemObject(Oop oop)
-    {
-        Oop = oop;
-    }
+	internal PersistentGemObject(Oop oop)
+	{
+		Oop = oop;
+	}
 
-    #region Equality
+	#region Equality
 
-    public override bool Equals([NotNullWhen(true)] object? obj)
-    {
-        return obj is PersistentGemObject && Equals((PersistentGemObject)obj);
-    }
+	public override bool Equals([NotNullWhen(true)] object? obj)
+	{
+		return obj is PersistentGemObject && Equals((PersistentGemObject)obj);
+	}
 
-    public bool Equals([NotNullWhen(true)] PersistentGemObject? other)
-    {
-        return other is not null && Oop == other.Oop;
-    }
+	public bool Equals([NotNullWhen(true)] PersistentGemObject? other)
+	{
+		return other is not null && Oop == other.Oop;
+	}
 
-    public override int GetHashCode()
-    {
-        return Oop.GetHashCode();
-    }
+	public override int GetHashCode()
+	{
+		return Oop.GetHashCode();
+	}
 
-    #endregion Equality
+	#endregion Equality
 }

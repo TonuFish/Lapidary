@@ -2,11 +2,11 @@
 
 public enum GciEventType
 {
-    gciSigNone,
-    gciSigAbort,
-    gciSigCommittedObjs,
-    gciSigFinishTrans,
-    gciSignalFromSession,
-    gciSigLostOt,
-    gciSigLostSession,
+	gciSigNone,
+	gciSigAbort,
+	gciSigCommittedObjs,
+	gciSigFinishTrans,
+	gciSignalFromSession,
+	gciSigLostOt,
+	gciSigLostSession,
 }
