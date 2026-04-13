@@ -362,6 +362,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
+# ReSharper files
+.idea/
+
 # GemBuilder required files
 GemBuilderFiles/
 
