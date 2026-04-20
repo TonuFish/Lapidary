@@ -16,9 +16,11 @@ public static class Configuration
 		[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(
 		this IServiceCollection services,
 		Action<GemStoneConfigurationBuilder<T>> configurationBuilderAction)
-		where T : GemStone
+		where T : GemStone<T>
 	{
 		ArgumentNullException.ThrowIfNull(configurationBuilderAction);
+
+		// TODO: Ensure this type hasn't already been registered
 
 		services.TryAddSingleton(LapidaryProvider.Instance);
 

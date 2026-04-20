@@ -4,26 +4,22 @@ namespace Lapidary.DependencyInjection;
 
 // TODO: Rename FooBase when specialising multi/single user connections
 
-public abstract class GemStone
+public abstract class GemStone<T> where T : GemStone<T>
 {
-	private readonly ReadOnlyMemory<byte> _gemService;
-	private readonly ReadOnlyMemory<byte> _hostPassword;
-	private readonly ReadOnlyMemory<byte> _hostUserId;
-	private readonly LapidaryProvider _provider;
-	private readonly ReadOnlyMemory<byte> _stoneName;
+	private readonly GemStoneConfiguration<T> _gemstoneConfiguration;
+	private readonly Dictionary<LoginIdentifier, LoginData> _logins = [];
 
-	private readonly Dictionary<LoginIdentifier, LoginData> _logins;
-
-	protected GemStone(GemStoneConfiguration gemStoneConfiguration)
+	protected GemStone(GemStoneConfiguration<T> gemStoneConfiguration)
 	{
 		ArgumentNullException.ThrowIfNull(gemStoneConfiguration);
 
-		_gemService = gemStoneConfiguration.GemService;
-		_hostPassword = gemStoneConfiguration.HostPassword;
-		_hostUserId = gemStoneConfiguration.HostUserId;
-		_logins = gemStoneConfiguration.Logins;
-		_provider = gemStoneConfiguration.Provider;
-		_stoneName = gemStoneConfiguration.StoneName;
+		_gemstoneConfiguration = gemStoneConfiguration;
+	}
+
+	public GemContext<T> GetContext(LoginIdentifier identifier)
+	{
+		return null!;
+		// TODO:
 	}
 }
 
@@ -45,7 +41,7 @@ public abstract class GemStoneConfiguration
 }
 
 public sealed class GemStoneConfiguration<T> : GemStoneConfiguration
-	where T : GemStone
+	where T : GemStone<T>
 {
 	internal GemStoneConfiguration(LapidaryProvider provider) : base(provider)
 	{
@@ -79,7 +75,7 @@ public abstract class GemStoneConfigurationBuilderBase
 }
 
 public sealed class GemStoneConfigurationBuilder<T> : GemStoneConfigurationBuilderBase
-	where T : GemStone
+	where T : GemStone<T>
 {
 	private readonly Dictionary<LoginIdentifier, ILogin> _identifiersToLogins = [];
 
@@ -224,9 +220,9 @@ internal sealed class DatabaseThing
 {
 }
 
-public abstract class GemStoneConfigurationBuilderValidatorBase
+internal abstract class GemStoneConfigurationBuilderValidatorBase
 {
-	public abstract void Validate<T>(GemStoneConfigurationBuilder<T> builder) where T : GemStone;
+	public abstract void Validate<T>(GemStoneConfigurationBuilder<T> builder) where T : GemStone<T>;
 
 	// TODO: Shared validation methods.
 }

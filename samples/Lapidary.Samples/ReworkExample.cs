@@ -27,7 +27,8 @@ internal static class ReworkExample
 			.WithValidatingLogin(identifier: new("foo"))
 			.Build();
 
-		FooGemStone myGsDatabase = new(configuration);
+		FooGemStone gemStone = new(configuration);
+		Use(gemStone);
 	}
 
 	public static void Foo()
@@ -52,11 +53,28 @@ internal static class ReworkExample
 
 		var host = hostBuilder.Build();
 
-		var myGsDatabase = host.Services.GetRequiredService<FooGemStone>();
+		// TODO: SP extension to do initial connection and validation
+
+		var gemStone = host.Services.GetRequiredService<FooGemStone>();
+		Use(gemStone);
+	}
+
+	public static void Use(FooGemStone gemStone)
+	{
+		var context = gemStone.GetContext(new("foo"));
+
+		// Use your connection.
+		var aObject = context.PerformSmalltalkRaw("72"u8);
+		var bObject = context.PerformSmalltalkRaw("43"u8);
+		var result = aObject.Perform("+"u8, bObject);
+
+		// Read some objects.
+		var resultAsText = result.Perform("printString"u8).GetString();
+		var resultAsNumber = result.GetNumber<int>();
 	}
 }
 
-public sealed class FooGemStone : GemStone
+public sealed class FooGemStone : GemStone<FooGemStone>
 {
 	public FooGemStone(GemStoneConfiguration<FooGemStone> gemStoneConfiguration) : base(gemStoneConfiguration)
 	{

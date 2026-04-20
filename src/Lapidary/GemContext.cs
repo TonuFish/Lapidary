@@ -1,6 +1,9 @@
-﻿namespace Lapidary;
+﻿using Lapidary.DependencyInjection;
 
-public sealed partial class GemContext
+namespace Lapidary;
+
+public sealed partial class GemContext<T>
+	where T : GemStone<T>
 {
 	internal GemBuilderSession Session { get; }
 

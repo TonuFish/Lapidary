@@ -1,14 +1,16 @@
-﻿using System.Threading;
+﻿using Lapidary.DependencyInjection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Lapidary.Experimental;
 
-public sealed class NonBlockingExecute
+public sealed class NonBlockingExecute<T>
+	where T : GemStone<T>
 {
-	private readonly GemContext _context;
+	private readonly GemContext<T> _context;
 	private readonly CancellationToken _ct;
 
-	public NonBlockingExecute(GemContext context, CancellationToken ct = default)
+	public NonBlockingExecute(GemContext<T> context, CancellationToken ct = default)
 	{
 		// TODO: Exception types here.
 		_context = context;

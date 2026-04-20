@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Lapidary;
 
-public sealed partial class GemContext
+public sealed partial class GemContext<T>
 {
 	// TODO: Actually finish this...
 	// TODO: Exception types here.
@@ -19,7 +19,7 @@ public sealed partial class GemContext
 		CancellationToken ct = default)
 	{
 		// TODO: Inline NBE entirely once stable
-		NonBlockingExecute nbe = new(this, ct);
+		NonBlockingExecute<T> nbe = new(this, ct);
 		return nbe.StartAsync(command);
 	}
 
