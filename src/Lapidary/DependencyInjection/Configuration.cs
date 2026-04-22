@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Lapidary.DependencyInjection;
 
@@ -20,20 +19,14 @@ public static class Configuration
 	{
 		ArgumentNullException.ThrowIfNull(configurationBuilderAction);
 
-		// TODO: Ensure this type hasn't already been registered
-
-		services.TryAddSingleton(LapidaryProvider.Instance);
-
 		GemStoneConfigurationBuilder<T> configurationBuilder = new();
 		configurationBuilderAction(configurationBuilder);
-
-		// TODO: Validate builder.
-
 		var configuration = configurationBuilder.Build();
 
-		// TODO: Add things to the provider.
+		// TODO: This is ugly, change it at some point.
+		_ = services.AddSingleton(_ => configuration);
 
-		_ = services.AddScoped(_ => configuration);
+		// TODO: Stop this needing dynamic constructor access.
 		_ = services.AddScoped<T>();
 
 		return services;

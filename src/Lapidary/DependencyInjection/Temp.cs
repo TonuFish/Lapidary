@@ -1,58 +1,359 @@
 ﻿using Lapidary.Converters;
+using Lapidary.Converters.Temporary;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Frozen;
+using System.Text;
 
 namespace Lapidary.DependencyInjection;
 
 // TODO: Rename FooBase when specialising multi/single user connections
 
+public static class ServiceProviderExtensions
+{
+	extension(IServiceProvider sp)
+	{
+		public void InitialiseGemStone<T>()
+			where T : GemStone<T>
+		{
+			var configuration = sp.GetRequiredService<GemStoneConfiguration<T>>();
+			configuration.EnsureInitialised();
+		}
+	}
+}
+
 public abstract class GemStone<T> where T : GemStone<T>
 {
-	private readonly GemStoneConfiguration<T> _gemstoneConfiguration;
-	private readonly Dictionary<LoginIdentifier, LoginData> _logins = [];
+	// TODO: Currently owned sessions? Or is that the <> job?
 
-	protected GemStone(GemStoneConfiguration<T> gemStoneConfiguration)
+	private readonly GemStoneConfiguration<T> _configuration;
+	private readonly Dictionary<LoginIdentifier, ILoginData> _logins = [];
+	private readonly GemStoneState _state;
+
+	protected GemStone(GemStoneConfiguration<T> configuration)
 	{
-		ArgumentNullException.ThrowIfNull(gemStoneConfiguration);
+		ArgumentNullException.ThrowIfNull(configuration);
 
-		_gemstoneConfiguration = gemStoneConfiguration;
+		var state = configuration.State;
+		if (!state.IsInitialised)
+		{
+			throw new InvalidOperationException("TODO");
+		}
+
+		_configuration = configuration;
+		_state = state;
 	}
 
 	public GemContext<T> GetContext(LoginIdentifier identifier)
 	{
+		// TODO: Set state, login
 		return null!;
-		// TODO:
 	}
 }
 
 public abstract class GemStoneConfiguration
 {
-	//! Finalised copy of settings. --- Converters are a bit of a `?`
+	internal GemStoneState State { get; init; }
 
-	internal ReadOnlyMemory<byte> GemService { get; init; }
-	internal ReadOnlyMemory<byte> HostPassword { get; init; }
-	internal ReadOnlyMemory<byte> HostUserId { get; init; }
-	internal Dictionary<LoginIdentifier, LoginData> Logins { get; init; }
-	internal LapidaryProvider Provider { get; init; }
-	internal ReadOnlyMemory<byte> StoneName { get; init; }
-
-	private protected GemStoneConfiguration(LapidaryProvider provider)
+	private protected GemStoneConfiguration(GemStoneState state)
 	{
-		Provider = provider;
+		State = state;
+	}
+
+	public void EnsureInitialised()
+	{
+		if (State.IsInitialised)
+		{
+			return;
+		}
+
+		State.Initialise();
 	}
 }
 
 public sealed class GemStoneConfiguration<T> : GemStoneConfiguration
 	where T : GemStone<T>
 {
-	internal GemStoneConfiguration(LapidaryProvider provider) : base(provider)
+	internal GemStoneConfiguration(GemStoneState state) : base(state)
 	{
 	}
 }
 
-internal sealed class LoginData
+internal sealed class GemStoneState
 {
-	public bool IsEncrypted { get; init; }
-	internal ReadOnlyMemory<byte> Password { get; init; }
-	internal ReadOnlyMemory<byte> Username { get; init; }
+	[MemberNotNullWhen(true, nameof(ClassConverters), nameof(NumberConverters), nameof(StructConverters))]
+	[MemberNotNullWhen(false, nameof(_validatingLogin))]
+	internal bool IsInitialised { get; private set; }
+
+	internal required ReadOnlyMemory<byte> GemService { get; init; }
+	internal required ReadOnlyMemory<byte> HostPassword { get; init; }
+	internal required ReadOnlyMemory<byte> HostUserId { get; init; }
+	internal required Dictionary<LoginIdentifier, ILoginData> Logins { get; init; }
+	internal required ReadOnlyMemory<byte> StoneName { get; init; }
+	internal required List<ILapidaryConverter> UserDefinedConverters { get; init; }
+
+	internal FrozenDictionary<ConverterKey, ILapidaryConverter>? ClassConverters { get; private set; }
+	internal FrozenDictionary<Oop, ILapidaryConverter>? NumberConverters { get; private set; }
+	internal FrozenDictionary<ConverterKey, ILapidaryConverter>? StructConverters { get; private set; }
+
+	private ILoginData? _validatingLogin;
+
+	internal GemStoneState(ILoginData validatingLogin)
+	{
+		_validatingLogin = validatingLogin;
+	}
+
+	internal void Initialise()
+	{
+		if (IsInitialised)
+		{
+			return;
+		}
+
+		// TODO: Session here and provide for converter hookup.
+		ProcessConverters(null!);
+		IsInitialised = true;
+	}
+
+	private GemBuilderSession GetValidatingUserSession()
+	{
+		// TODO: This - clear validating too?
+		return Login(_validatingLogin);
+	}
+
+	#region Login code that should be somewhere else
+
+	private GemBuilderSession Login(ILoginData data)
+	{
+		// TODO: Switch on login type
+		// TODO: Session tracking
+
+		var session = data switch
+		{
+			BasicLoginData bld => BasicLogin(bld),
+			EncryptedLoginData eld => EncryptedLogin(eld),
+			X509LoginData xld => X509Login(xld),
+			_ => ThrowHelper.GenericExceptionToDetailLater<GemBuilderSession>(),
+		};
+
+		// TODO: Bucket -> State, maybe subset
+		return new(session, null!);
+
+		GciSession BasicLogin(BasicLoginData login)
+		{
+			return FFI.Login(
+				StoneName.Span,
+				HostUserId.Span,
+				HostPassword.Span,
+				GemService.Span,
+				login.Username.Span,
+				login.Password.Span);
+		}
+
+		GciSession EncryptedLogin(EncryptedLoginData login)
+		{
+			return FFI.LoginEncrypted(
+				StoneName.Span,
+				HostUserId.Span,
+				HostPassword.Span,
+				GemService.Span,
+				login.Username.Span,
+				login.Password.Span);
+		}
+
+		GciSession X509Login(X509LoginData login)
+		{
+			// TODO: This.
+			throw new NotImplementedException();
+		}
+	}
+
+	private void Logout(GciSession session)
+	{
+		// TODO: Session tracking etc.
+		FFI.Logout(session);
+	}
+
+	#endregion Login code that should be somewhere else
+
+	#region LIFTED - PENDING REWORKS
+
+	private Oop FindSymbol(GemBuilderSession session, ReadOnlySpan<char> symbol)
+	{
+		var symbolCount = Encoding.UTF8.GetByteCount(symbol);
+		// TODO: Fixed size stackalloc
+		Span<byte> symbolBuffer = stackalloc byte[symbolCount + 1];
+		Encoding.UTF8.GetBytes(symbol, symbolBuffer);
+		symbolBuffer[^1] = 0;
+		var oop = FFI.ResolveSymbol(session, symbolBuffer);
+		if (oop == ReservedOops.OOP_ILLEGAL)
+		{
+			ThrowHelper.GenericExceptionToDetailLater();
+		}
+		return oop;
+	}
+
+	private void ProcessConverters(GemBuilderSession session)
+	{
+		if (IsInitialised)
+		{
+			return;
+		}
+
+		if (UserDefinedConverters is null)
+		{
+			FinaliseConverters();
+			return;
+		}
+
+		Dictionary<ConverterKey, ILapidaryConverter> classConverters = [];
+		Dictionary<Oop, ILapidaryConverter> numberConverters = [];
+		Dictionary<ConverterKey, ILapidaryConverter> structConverters = [];
+
+		foreach (var converter in UserDefinedConverters)
+		{
+			if (converter.IdentifyingOops.Count == 0 && converter.IdentifyingSymbols.Count == 0)
+			{
+				ThrowHelper.GenericExceptionToDetailLater();
+			}
+
+			HashSet<Oop> targetOops = [.. converter.IdentifyingOops];
+
+			foreach (var symbol in converter.IdentifyingSymbols)
+			{
+				targetOops.Add(FindSymbol(session, symbol.AsSpan()));
+			}
+
+			if (converter.CanConvertToClass)
+			{
+				foreach (var oop in targetOops)
+				{
+					if (!classConverters.TryAdd(new(oop, converter.ConversionType), converter))
+					{
+						ThrowHelper.GenericExceptionToDetailLater();
+					}
+				}
+			}
+
+			if (converter.CanConvertToNumber)
+			{
+				foreach (var oop in targetOops)
+				{
+					if (!numberConverters.TryAdd(oop, converter))
+					{
+						ThrowHelper.GenericExceptionToDetailLater();
+					}
+				}
+			}
+
+			if (converter.CanConvertToStruct)
+			{
+				foreach (var oop in targetOops)
+				{
+					if (!structConverters.TryAdd(new(oop, converter.ConversionType), converter))
+					{
+						ThrowHelper.GenericExceptionToDetailLater();
+					}
+				}
+			}
+		}
+
+		FinaliseConverters(classConverters, numberConverters, structConverters);
+	}
+
+	#region Default Converters (TO REFACTOR)
+
+	// TODO: Quick hack job, do it properly.
+
+	private void FinaliseConverters(
+		Dictionary<ConverterKey, ILapidaryConverter>? classConverters = null,
+		Dictionary<Oop, ILapidaryConverter>? numberConverters = null,
+		Dictionary<ConverterKey, ILapidaryConverter>? structConverters = null)
+	{
+		if (IsInitialised)
+		{
+			return;
+		}
+
+		classConverters ??= [];
+		numberConverters ??= [];
+		structConverters ??= [];
+
+		AddDefaultClassConverters(classConverters);
+		AddDefaultNumberConverters(numberConverters);
+		AddDefaultStructConverters(structConverters);
+
+		ClassConverters = classConverters.ToFrozenDictionary();
+		NumberConverters = numberConverters.ToFrozenDictionary();
+		StructConverters = structConverters.ToFrozenDictionary();
+
+		_validatingLogin = null;
+		IsInitialised = true;
+	}
+
+	private void AddDefaultClassConverters(Dictionary<ConverterKey, ILapidaryConverter> classConverters)
+	{
+		classConverters.EnsureCapacity(2);
+
+		StandardStringConverter a0 = new();
+		foreach (var oop in a0.IdentifyingOops)
+		{
+			classConverters.TryAdd(new(oop, a0.ConversionType), a0);
+		}
+
+		OtherStringConverter a1 = new();
+		foreach (var oop in a1.IdentifyingOops)
+		{
+			classConverters.TryAdd(new(oop, a1.ConversionType), a1);
+		}
+	}
+
+	private void AddDefaultNumberConverters(Dictionary<Oop, ILapidaryConverter> numberConverters)
+	{
+		numberConverters.EnsureCapacity(2);
+
+		IntegerConverter a0 = new();
+		foreach (var oop in a0.IdentifyingOops)
+		{
+			numberConverters.TryAdd(oop, a0);
+		}
+
+		FloatConverter a1 = new();
+		foreach (var oop in a1.IdentifyingOops)
+		{
+			numberConverters.TryAdd(oop, a1);
+		}
+	}
+
+	private void AddDefaultStructConverters(Dictionary<ConverterKey, ILapidaryConverter> structConverters)
+	{
+		// None.
+	}
+
+	#endregion Default Converters (TO REFACTOR)
+
+	#endregion LIFTED - PENDING REWORKS
+}
+
+internal interface ILoginData
+{
+	// TODO: Last login timestamp?
+}
+
+internal sealed class BasicLoginData : ILoginData
+{
+	internal required ReadOnlyMemory<byte> Password { get; init; }
+	internal required ReadOnlyMemory<byte> Username { get; init; }
+}
+
+internal sealed class EncryptedLoginData : ILoginData
+{
+	internal required ReadOnlyMemory<byte> Password { get; init; }
+	internal required ReadOnlyMemory<byte> Username { get; init; }
+}
+
+internal sealed class X509LoginData : ILoginData
+{
+	// TODO
 }
 
 public abstract class GemStoneConfigurationBuilderBase
@@ -85,9 +386,60 @@ public sealed class GemStoneConfigurationBuilder<T> : GemStoneConfigurationBuild
 
 	public GemStoneConfiguration<T> Build()
 	{
-		// TODO: This.
+		Validate();
+
+		Dictionary<LoginIdentifier, ILoginData> logins = new(capacity: _identifiersToLogins.Count);
+		foreach (var (id, login) in _identifiersToLogins)
+		{
+			logins[id] = ToData(login);
+		}
+
+		GemStoneState todo = new(ToData(_validatingLogin!))
+		{
+			GemService = ToNullTerminatedAsciiBytes(_gemService),
+			HostPassword = ToNullTerminatedAsciiBytes(_hostPassword),
+			HostUserId = ToNullTerminatedAsciiBytes(_hostUserId),
+			Logins = logins,
+			StoneName = ToNullTerminatedAsciiBytes(_stoneName),
+			UserDefinedConverters = _converters,
+		};
+
+		return new(todo);
+	}
+
+	private ILoginData ToData(ILogin login)
+	{
+		return login switch
+		{
+			BasicLogin { IsEncrypted: true, } el => new BasicLoginData()
+			{
+				Password = ToNullTerminatedAsciiBytes(el.Password),
+				Username = ToNullTerminatedAsciiBytes(el.Username),
+			},
+			BasicLogin bl => new EncryptedLoginData()
+			{
+				Password = ToNullTerminatedAsciiBytes(bl.Password),
+				Username = ToNullTerminatedAsciiBytes(bl.Username),
+			},
+			X509Login xl => new X509LoginData(), // TODO: This.
+			_ => ThrowHelper.GenericExceptionToDetailLater<ILoginData>(),
+		};
+	}
+
+	private void Validate()
+	{
+		// TODO: This entirely.
 		_validator.Validate(this);
-		return new(LapidaryProvider.Instance);
+	}
+
+	private ReadOnlyMemory<byte> ToNullTerminatedAsciiBytes(ReadOnlySpan<char> text)
+	{
+		// TODO: Make sure this doesn't need to be UTF8 for GemStone/login details
+		// https://downloads.gemtalksystems.com/docs/GemStone64/3.7.x/GS64-SysAdminGuide-3.7/MAIN.htm
+		var length = Encoding.ASCII.GetByteCount(text);
+		var buffer = new byte[length + 1];
+		_ = Encoding.ASCII.GetBytes(text, buffer);
+		return buffer;
 	}
 
 	public GemStoneConfigurationBuilder<T> ConfigureConnection(
@@ -195,29 +547,6 @@ public readonly struct LoginIdentifier : IEquatable<LoginIdentifier>
 	{
 		return Id.GetHashCode(StringComparison.Ordinal);
 	}
-}
-
-internal sealed class LapidaryProvider
-{
-	/*
-	 * Per database.
-	 * - Sessions
-	 * - Logins
-	 */
-
-	private readonly Dictionary<Type, DatabaseThing> _asdf = [];
-
-	internal static LapidaryProvider Instance { get; } = new();
-
-	// TODO: DB bucket -> Configs, Sessions, Logins
-
-	private LapidaryProvider()
-	{
-	}
-}
-
-internal sealed class DatabaseThing
-{
 }
 
 internal abstract class GemStoneConfigurationBuilderValidatorBase

@@ -6,7 +6,8 @@ public sealed class GemContextFactory : IGemContextFactory
 {
 	private readonly ConcurrentDictionary<SessionIdentifier, GemBuilderSession> _sessions = new();
 
-	public GemContext GetContext(SessionIdentifier sessionIdentifier)
+	public GemContext<T> GetContext<T>(SessionIdentifier sessionIdentifier)
+		where T : GemStone<T>
 	{
 		if (!_sessions.TryGetValue(sessionIdentifier, out var session))
 		{

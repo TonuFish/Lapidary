@@ -15,17 +15,19 @@ internal static class ReworkExample
 			.ConfigureConnection(
 				gemService: "!tcp@localhost#netldi:50377#task!gemnetobject",
 				stoneName: "!@localhost!gs64stone")
-			.WithConverters(
-			[
-				new FooHalfConverter(),
-			])
 			.SkipStandardConverters()
+			.WithConverters(
+				[
+					new FooHalfConverter(),
+				])
 			.WithUserLogins(
-			[
-				new BasicLogin(new("foo"), "DataCurator", "swordfish"),
-			])
+				[
+					new BasicLogin(new("foo"), "DataCurator", "swordfish"),
+				])
 			.WithValidatingLogin(identifier: new("foo"))
 			.Build();
+
+		configuration.EnsureInitialised();
 
 		FooGemStone gemStone = new(configuration);
 		Use(gemStone);
@@ -40,11 +42,11 @@ internal static class ReworkExample
 				.ConfigureConnection(
 					gemService: "!tcp@localhost#netldi:50377#task!gemnetobject",
 					stoneName: "!@localhost!gs64stone")
+				.SkipStandardConverters()
 				.WithConverters(
 					[
 						new FooHalfConverter(),
 					])
-				.SkipStandardConverters()
 				.WithUserLogins(
 					[
 						new BasicLogin(new("foo"), "DataCurator", "swordfish"),
@@ -53,7 +55,7 @@ internal static class ReworkExample
 
 		var host = hostBuilder.Build();
 
-		// TODO: SP extension to do initial connection and validation
+		host.Services.InitialiseGemStone<FooGemStone>();
 
 		var gemStone = host.Services.GetRequiredService<FooGemStone>();
 		Use(gemStone);
@@ -76,7 +78,7 @@ internal static class ReworkExample
 
 public sealed class FooGemStone : GemStone<FooGemStone>
 {
-	public FooGemStone(GemStoneConfiguration<FooGemStone> gemStoneConfiguration) : base(gemStoneConfiguration)
+	public FooGemStone(GemStoneConfiguration<FooGemStone> configuration) : base(configuration)
 	{
 	}
 }

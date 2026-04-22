@@ -1,6 +1,8 @@
-﻿namespace Lapidary;
+﻿using Lapidary.DependencyInjection;
+
+namespace Lapidary;
 
 public interface IGemContextFactory
 {
-	public GemContext GetContext(SessionIdentifier sessionIdentifier);
+	public GemContext<T> GetContext<T>(SessionIdentifier sessionIdentifier) where T : GemStone<T>;
 }
