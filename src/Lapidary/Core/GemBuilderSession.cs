@@ -1,25 +1,26 @@
 ﻿using System.Threading;
 using Lapidary.Converters;
+using Lapidary.DependencyInjection;
 
 namespace Lapidary.Core;
 
 internal sealed class GemBuilderSession
 {
-	internal DatabaseBucket Bucket { get; }
+	internal GemStoneState State { get; }
 	internal GciSession Session { get; }
 
 	private readonly Queue<GemBuilderErrorInformation> _errors = new();
 
-	internal GemBuilderSession(GciSession session, DatabaseBucket bucket)
+	internal GemBuilderSession(GciSession session, GemStoneState state)
 	{
-		Bucket = bucket;
 		Session = session;
+		State = state;
 	}
 
 	internal ILapidaryConverter? GetClassConverter(Type targetType, Oop classOop)
 	{
 		// TODO: Clarify null safety after restructure.
-		return Bucket.ClassConverters!.TryGetValue(new(classOop, targetType), out var converter)
+		return State.ClassConverters!.TryGetValue(new(classOop, targetType), out var converter)
 			? converter
 			: null;
 	}
@@ -27,7 +28,7 @@ internal sealed class GemBuilderSession
 	internal ILapidaryConverter? GetNumberConverter(Oop numberOop)
 	{
 		// TODO: Clarify null safety after restructure.
-		return Bucket.NumberConverters!.TryGetValue(numberOop, out var converter)
+		return State.NumberConverters!.TryGetValue(numberOop, out var converter)
 			? converter
 			: null;
 	}
@@ -35,7 +36,7 @@ internal sealed class GemBuilderSession
 	internal ILapidaryConverter? GetStructConverter(Type targetType, Oop structOop)
 	{
 		// TODO: Clarify null safety after restructure.
-		return Bucket.StructConverters!.TryGetValue(new(structOop, targetType), out var converter)
+		return State.StructConverters!.TryGetValue(new(structOop, targetType), out var converter)
 			? converter
 			: null;
 	}

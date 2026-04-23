@@ -26,7 +26,7 @@ public abstract class GemStone<T> where T : GemStone<T>
 	// TODO: Currently owned sessions? Or is that the <> job?
 
 	private readonly GemStoneConfiguration<T> _configuration;
-	private readonly Dictionary<LoginIdentifier, ILoginData> _logins = [];
+	private readonly Dictionary<LoginIdentifier, LoginData> _logins = [];
 	private readonly GemStoneState _state;
 
 	protected GemStone(GemStoneConfiguration<T> configuration)
@@ -80,14 +80,28 @@ public sealed class GemStoneConfiguration<T> : GemStoneConfiguration
 
 internal sealed class GemStoneState
 {
+	// TODO: Thread safety
+
 	[MemberNotNullWhen(true, nameof(ClassConverters), nameof(NumberConverters), nameof(StructConverters))]
 	[MemberNotNullWhen(false, nameof(_validatingLogin))]
-	internal bool IsInitialised { get; private set; }
+	internal bool IsInitialised
+	{
+		get;
+		private set
+		{
+			if (field || !value)
+			{
+				ThrowHelper.GenericExceptionToDetailLater();
+			}
+
+			field = true;
+		}
+	}
 
 	internal required ReadOnlyMemory<byte> GemService { get; init; }
 	internal required ReadOnlyMemory<byte> HostPassword { get; init; }
 	internal required ReadOnlyMemory<byte> HostUserId { get; init; }
-	internal required Dictionary<LoginIdentifier, ILoginData> Logins { get; init; }
+	internal required Dictionary<LoginIdentifier, LoginData> Logins { get; init; }
 	internal required ReadOnlyMemory<byte> StoneName { get; init; }
 	internal required List<ILapidaryConverter> UserDefinedConverters { get; init; }
 
@@ -95,9 +109,11 @@ internal sealed class GemStoneState
 	internal FrozenDictionary<Oop, ILapidaryConverter>? NumberConverters { get; private set; }
 	internal FrozenDictionary<ConverterKey, ILapidaryConverter>? StructConverters { get; private set; }
 
-	private ILoginData? _validatingLogin;
+	private readonly Dictionary<GciSession, LoginData> _sessions = [];
 
-	internal GemStoneState(ILoginData validatingLogin)
+	private LoginData? _validatingLogin;
+
+	internal GemStoneState(LoginData validatingLogin)
 	{
 		_validatingLogin = validatingLogin;
 	}
@@ -122,7 +138,7 @@ internal sealed class GemStoneState
 
 	#region Login code that should be somewhere else
 
-	private GemBuilderSession Login(ILoginData data)
+	private GemBuilderSession Login(LoginData data)
 	{
 		// TODO: Switch on login type
 		// TODO: Session tracking
@@ -135,8 +151,8 @@ internal sealed class GemStoneState
 			_ => ThrowHelper.GenericExceptionToDetailLater<GemBuilderSession>(),
 		};
 
-		// TODO: Bucket -> State, maybe subset
-		return new(session, null!);
+		_sessions.Add(session, data);
+		return new(session, this);
 
 		GciSession BasicLogin(BasicLoginData login)
 		{
@@ -334,24 +350,38 @@ internal sealed class GemStoneState
 	#endregion LIFTED - PENDING REWORKS
 }
 
-internal interface ILoginData
+internal abstract class LoginData
 {
-	// TODO: Last login timestamp?
+	// TODO: Thread safety
+	internal DateTime LastLoginUtc { get; private set; }
+
+	private readonly List<GciSession> _sessions = [];
+
+	internal void AddSession(GciSession session)
+	{
+		_sessions.Add(session);
+		LastLoginUtc = DateTime.UtcNow;
+	}
+
+	internal void RemoveSession(GciSession session)
+	{
+		_ = _sessions.Remove(session);
+	}
 }
 
-internal sealed class BasicLoginData : ILoginData
+internal sealed class BasicLoginData : LoginData
 {
 	internal required ReadOnlyMemory<byte> Password { get; init; }
 	internal required ReadOnlyMemory<byte> Username { get; init; }
 }
 
-internal sealed class EncryptedLoginData : ILoginData
+internal sealed class EncryptedLoginData : LoginData
 {
 	internal required ReadOnlyMemory<byte> Password { get; init; }
 	internal required ReadOnlyMemory<byte> Username { get; init; }
 }
 
-internal sealed class X509LoginData : ILoginData
+internal sealed class X509LoginData : LoginData
 {
 	// TODO
 }
@@ -388,7 +418,7 @@ public sealed class GemStoneConfigurationBuilder<T> : GemStoneConfigurationBuild
 	{
 		Validate();
 
-		Dictionary<LoginIdentifier, ILoginData> logins = new(capacity: _identifiersToLogins.Count);
+		Dictionary<LoginIdentifier, LoginData> logins = new(capacity: _identifiersToLogins.Count);
 		foreach (var (id, login) in _identifiersToLogins)
 		{
 			logins[id] = ToData(login);
@@ -407,24 +437,47 @@ public sealed class GemStoneConfigurationBuilder<T> : GemStoneConfigurationBuild
 		return new(todo);
 	}
 
-	private ILoginData ToData(ILogin login)
+	private LoginData ToData(ILogin login)
 	{
 		return login switch
 		{
-			BasicLogin { IsEncrypted: true, } el => new BasicLoginData()
+			BasicLogin { IsEncrypted: false, } el => new BasicLoginData()
 			{
 				Password = ToNullTerminatedAsciiBytes(el.Password),
 				Username = ToNullTerminatedAsciiBytes(el.Username),
 			},
 			BasicLogin bl => new EncryptedLoginData()
 			{
+				// TODO: Actually encrypt, below
 				Password = ToNullTerminatedAsciiBytes(bl.Password),
 				Username = ToNullTerminatedAsciiBytes(bl.Username),
 			},
 			X509Login xl => new X509LoginData(), // TODO: This.
-			_ => ThrowHelper.GenericExceptionToDetailLater<ILoginData>(),
+			_ => ThrowHelper.GenericExceptionToDetailLater<LoginData>(),
 		};
 	}
+
+	//public EncryptedLoginCredentials EncryptCredentials(BasicLoginCredentials loginBucket)
+	//{
+	//	var bufferSize = Encoding.UTF8.GetByteCount(loginBucket.Password);
+
+	//	// TODO: Fixed size stackalloc
+	//	Span<byte> buffer = stackalloc byte[bufferSize + 1];
+	//	Encoding.UTF8.GetBytes(loginBucket.Password.AsSpan(), buffer);
+	//	buffer[^1] = 0;
+
+	//	var encryptedBuffer = FFI.Encrypt(buffer);
+	//	if (!encryptedBuffer.HasValue)
+	//	{
+	//		ThrowHelper.GenericExceptionToDetailLater();
+	//	}
+
+	//	Memory<byte> usernameBuffer = new(new byte[Encoding.UTF8.GetByteCount(loginBucket.Username) + 1]);
+	//	Encoding.UTF8.GetBytes(loginBucket.Username, usernameBuffer.Span);
+	//	usernameBuffer.Span[^1] = 0;
+
+	//	return new(usernameBuffer, encryptedBuffer.Value);
+	//}
 
 	private void Validate()
 	{
@@ -563,3 +616,11 @@ internal sealed class GemStoneConfigurationBuilderValidator : GemStoneConfigurat
 		throw new NotImplementedException();
 	}
 }
+
+// TODO: Rehome orphaned code
+//public static string GetGemBuilderVersion()
+//{
+//	Span<byte> buffer = stackalloc byte[128];
+//	buffer.Clear();
+//	return FFI.GetGemBuilderVersion(buffer).DecodeUTF8();
+//}
