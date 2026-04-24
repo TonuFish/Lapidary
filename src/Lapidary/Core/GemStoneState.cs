@@ -34,8 +34,13 @@ internal sealed class GemStoneState
 	internal required ReadOnlyMemory<byte> StoneName { get; init; }
 	internal required List<ILapidaryConverter> UserDefinedConverters { get; init; }
 
+	[NotNull]
 	internal FrozenDictionary<ConverterKey, ILapidaryConverter>? ClassConverters { get; private set; }
+
+	[NotNull]
 	internal FrozenDictionary<Oop, ILapidaryConverter>? NumberConverters { get; private set; }
+
+	[NotNull]
 	internal FrozenDictionary<ConverterKey, ILapidaryConverter>? StructConverters { get; private set; }
 
 	private readonly Dictionary<GciSession, LoginData> _sessions = [];

@@ -18,26 +18,17 @@ internal sealed class GemBuilderSession
 
 	internal ILapidaryConverter? GetClassConverter(Type targetType, Oop classOop)
 	{
-		// TODO: Clarify null safety after restructure.
-		return State.ClassConverters!.TryGetValue(new(classOop, targetType), out var converter)
-			? converter
-			: null;
+		return State.ClassConverters.GetValueOrDefault(new(classOop, targetType));
 	}
 
 	internal ILapidaryConverter? GetNumberConverter(Oop numberOop)
 	{
-		// TODO: Clarify null safety after restructure.
-		return State.NumberConverters!.TryGetValue(numberOop, out var converter)
-			? converter
-			: null;
+		return State.NumberConverters.GetValueOrDefault(numberOop);
 	}
 
 	internal ILapidaryConverter? GetStructConverter(Type targetType, Oop structOop)
 	{
-		// TODO: Clarify null safety after restructure.
-		return State.StructConverters!.TryGetValue(new(structOop, targetType), out var converter)
-			? converter
-			: null;
+		return State.StructConverters.GetValueOrDefault(new(structOop, targetType));
 	}
 
 	#region VERY TEMPORARY IMPLICIT CONVERSION
