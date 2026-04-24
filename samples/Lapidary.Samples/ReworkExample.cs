@@ -1,5 +1,7 @@
-﻿using Lapidary.Converters;
-using Lapidary.DependencyInjection;
+﻿using Lapidary.Authentication;
+using Lapidary.Configuration;
+using Lapidary.Converters;
+using Lapidary.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;

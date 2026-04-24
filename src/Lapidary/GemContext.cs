@@ -1,6 +1,4 @@
-﻿using Lapidary.DependencyInjection;
-
-namespace Lapidary;
+﻿namespace Lapidary;
 
 public sealed partial class GemContext<T>
 	where T : GemStone<T>

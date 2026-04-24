@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using Lapidary.Converters;
-using Lapidary.DependencyInjection;
 
 namespace Lapidary.Core;
 

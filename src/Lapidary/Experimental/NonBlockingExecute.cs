@@ -1,5 +1,4 @@
-﻿using Lapidary.DependencyInjection;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 namespace Lapidary.Experimental;
