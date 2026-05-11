@@ -16,11 +16,12 @@ internal static class ReadOnlySpanExtensions
 		{
 			// TODO: Double check \0.
 			byte[]? rentedArray = null;
-			var buffer = chars.Length <= 256
-				? (stackalloc byte[256])[..chars.Length]
-				: (rentedArray = ArrayPool<byte>.Shared.Rent(chars.Length)).AsSpan(0, chars.Length);
+			var buffer = chars.Length < 256
+				? (stackalloc byte[256])[..(chars.Length + 1)]
+				: (rentedArray = ArrayPool<byte>.Shared.Rent(chars.Length)).AsSpan(0, chars.Length + 1);
 
 			_ = Encoding.UTF8.GetBytes(chars, buffer);
+			buffer[^1] = 0;
 
 			var encryptedBuffer = FFI.Encrypt(buffer);
 			if (!encryptedBuffer.HasValue)

@@ -24,6 +24,7 @@ public sealed class GemStoneConfigurationBuilder<T> : GemStoneConfigurationBuild
 		// TODO: If using a validating identifier the credentials get created twice.
 		GemStoneState state = new(LoginData.Create(ValidatingLogin!))
 		{
+			AddStandardConverters = AddStandardConverters,
 			GemService = GemService.ToNullTerminatedBytes(),
 			HostPassword = HostPassword.ToNullTerminatedBytes(),
 			HostUserId = HostUserId.ToNullTerminatedBytes(),

@@ -3,6 +3,8 @@
 public sealed partial class GemContext<T>
 	where T : GemStone<T>
 {
+	// TODO: Make this disposable.
+
 	internal GemBuilderSession Session { get; }
 
 	#region Known Oops

@@ -11,6 +11,8 @@ internal sealed class GemStoneState
 {
 	// TODO: Thread safety
 
+	internal required bool AddStandardConverters { get; init; }
+
 	[MemberNotNullWhen(true, nameof(ClassConverters), nameof(NumberConverters), nameof(StructConverters))]
 	[MemberNotNullWhen(false, nameof(_validatingLogin))]
 	internal bool IsInitialised
@@ -60,24 +62,36 @@ internal sealed class GemStoneState
 			return;
 		}
 
-		// TODO: Session here and provide for converter hookup.
-		ProcessConverters(null!);
+		var session = Login(_validatingLogin);
+		try
+		{
+			ProcessConverters(session);
 		IsInitialised = true;
 	}
+		catch (Exception ex)
+		{
+			// TODO: Errors.
+		}
+		finally
+		{
+			Logout(session);
+		}
+	}
 
-	private GemBuilderSession GetValidatingUserSession()
+	public GemBuilderSession LoginUser(LoginIdentifier identifier)
 	{
-		// TODO: This - clear validating too?
-		return Login(_validatingLogin);
+		if (!Logins.TryGetValue(identifier, out var data))
+		{
+			ThrowHelper.GenericExceptionToDetailLater();
+	}
+
+		return Login(data);
 	}
 
 	#region Login code that should be somewhere else
 
 	private GemBuilderSession Login(LoginData data)
 	{
-		// TODO: Switch on login type
-		// TODO: Session tracking
-
 		var session = data switch
 		{
 			BasicLoginData bld => BasicLogin(bld),
@@ -120,8 +134,10 @@ internal sealed class GemStoneState
 
 	private void Logout(GciSession session)
 	{
-		// TODO: Session tracking etc.
+		if (_sessions.Remove(session))
+		{
 		FFI.Logout(session);
+	}
 	}
 
 	#endregion Login code that should be somewhere else
