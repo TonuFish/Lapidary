@@ -79,36 +79,24 @@ public static class FFI
 
 	public static ReadOnlyMemory<byte>? Encrypt(ReadOnlySpan<byte> clearText)
 	{
-		// TODO: Clean and simplify the little experiment.
-
+		// TODO: Double check encrypt trialing \0 handling.
 		if (clearText.Length == 0)
 		{
 			return null;
 		}
 
-		var size = clearText.Length + 24;
-		while (EncryptNeedsLargerBuffer(clearText, size))
-		{
-			size++;
-		}
-
-		Memory<byte> encryptedBuffer = new(new byte[size]);
+		Span<byte> buffer = stackalloc byte[256];
+		buffer.Clear();
 
 		unsafe
 		{
-			return Methods.GciTsEncrypt(clearText, encryptedBuffer.Span, (size_t)encryptedBuffer.Length) != null
-				? encryptedBuffer
-				: null;
-		}
-
-		static bool EncryptNeedsLargerBuffer(ReadOnlySpan<byte> clearText, int size)
-		{
-			Span<byte> buffer = stackalloc byte[size];
-			unsafe
+			while (Methods.GciTsEncrypt(clearText, buffer, (size_t)buffer.Length) == null)
 			{
-				return Methods.GciTsEncrypt(clearText, buffer, (size_t)size) == null;
+				buffer = new byte[buffer.Length * 2];
 			}
 		}
+
+		return new(buffer[..(buffer.IndexOf((byte)0) + 1)].ToArray());
 	}
 
 	public static Oop Execute(GciSession session, ReadOnlySpan<byte> command)

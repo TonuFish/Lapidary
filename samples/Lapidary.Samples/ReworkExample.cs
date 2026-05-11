@@ -85,7 +85,7 @@ public sealed class FooGemStone : GemStone<FooGemStone>
 	}
 }
 
-public class FooHalfConverter : LapidaryNumberConverter<Half>
+public sealed class FooHalfConverter : LapidaryNumberConverter<Half>
 {
 	public override IList<ulong> IdentifyingOops => [];
 

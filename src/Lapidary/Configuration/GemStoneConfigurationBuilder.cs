@@ -6,16 +6,17 @@ namespace Lapidary.Configuration;
 
 public abstract class GemStoneConfigurationBuilder
 {
-	private protected readonly List<ILapidaryConverter> _converters = [];
-	private protected readonly GemStoneConfigurationBuilderValidator _validator;
+	internal bool AddStandardConverters { get; private protected set; } = true;
+	internal List<ILapidaryConverter> Converters { get; } = [];
+	internal string? GemService { get; private protected set; }
+	internal string? HostPassword { get; private protected set; }
+	internal string? HostUserId { get; private protected set; }
+	internal Dictionary<LoginIdentifier, ILogin> IdentifiersToLogins { get; } = [];
+	internal string? StoneName { get; private protected set; }
+	internal LoginIdentifier? ValidatingIdentifier { get; private protected set; }
+	internal ILogin? ValidatingLogin { get; private protected set; }
 
-	private protected string? _gemService;
-	private protected string? _hostPassword;
-	private protected string? _hostUserId;
-	private protected bool _skipStandardConverters;
-	private protected string? _stoneName;
-	private protected LoginIdentifier? _validatingIdentifier;
-	private protected ILogin? _validatingLogin;
+	private protected readonly GemStoneConfigurationBuilderValidator _validator;
 
 	private protected GemStoneConfigurationBuilder(GemStoneConfigurationBuilderValidator validator)
 	{

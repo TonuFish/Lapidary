@@ -2,14 +2,14 @@
 
 public readonly struct LoginIdentifier : IEquatable<LoginIdentifier>
 {
-	public required string Id { get; init; }
+	public string Id { get; }
 
 	public static bool operator ==(LoginIdentifier left, LoginIdentifier right) => left.Equals(right);
 	public static bool operator !=(LoginIdentifier left, LoginIdentifier right) => !(left == right);
 
-	[SetsRequiredMembers]
 	public LoginIdentifier(string id)
 	{
+		ArgumentNullException.ThrowIfNull(id);
 		Id = id;
 	}
 

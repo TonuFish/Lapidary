@@ -17,4 +17,9 @@ internal static class ThrowHelper
 	{
 		throw new InvalidOperationException();
 	}
+
+	public static T ThrowUnreachableException<T>()
+	{
+		throw new UnreachableException();
+	}
 }

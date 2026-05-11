@@ -2,11 +2,11 @@
 
 public sealed class BasicLogin : ILogin
 {
-	public LoginIdentifier Identifier { get; init; }
+	public LoginIdentifier Identifier { get; }
 
-	internal bool IsEncrypted { get; init; }
-	internal string Password { get; init; }
-	internal string Username { get; init; }
+	internal bool IsEncrypted { get; }
+	internal string Password { get; }
+	internal string Username { get; }
 
 	public BasicLogin(LoginIdentifier identifier, string username, string password, bool encrypted = true)
 	{

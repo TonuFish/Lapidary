@@ -24,6 +24,7 @@ internal sealed class GemStoneState
 			}
 
 			field = true;
+			_validatingLogin = null;
 		}
 	}
 
@@ -32,7 +33,7 @@ internal sealed class GemStoneState
 	internal required ReadOnlyMemory<byte> HostUserId { get; init; }
 	internal required Dictionary<LoginIdentifier, LoginData> Logins { get; init; }
 	internal required ReadOnlyMemory<byte> StoneName { get; init; }
-	internal required List<ILapidaryConverter> UserDefinedConverters { get; init; }
+	internal required List<ILapidaryConverter>? UserDefinedConverters { get; init; }
 
 	[NotNull]
 	internal FrozenDictionary<ConverterKey, ILapidaryConverter>? ClassConverters { get; private set; }
