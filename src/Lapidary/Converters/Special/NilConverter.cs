@@ -12,9 +12,9 @@ internal sealed class NilConverter : ILapidaryConverter
 
 	public Type ConversionType => typeof(object);
 
-	public IList<ulong> IdentifyingOops => [ReservedOops.OOP_NIL];
+	public IReadOnlyList<ulong> IdentifyingOops => [ReservedOops.OOP_NIL,];
 
-	public IList<string> IdentifyingSymbols => [];
+	public IReadOnlyList<string> IdentifyingSymbols => [];
 
 	public TTo ConvertToClass<TTo>(GemObject gemObject) where TTo : class
 	{

@@ -2,9 +2,9 @@
 
 internal sealed class SmallIntegerConverter : LapidaryNumberConverter<long>
 {
-	public override IList<Oop> IdentifyingOops => [ReservedOops.OOP_TAG_SMALLINT];
+	public override IReadOnlyList<Oop> IdentifyingOops => [ReservedOops.OOP_TAG_SMALLINT,];
 
-	public override IList<string> IdentifyingSymbols => [];
+	public override IReadOnlyList<string> IdentifyingSymbols => [];
 
 	protected override ConversionResult<long> ConvertObject(GemObject gemObject)
 	{

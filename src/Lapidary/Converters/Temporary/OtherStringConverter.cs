@@ -5,7 +5,7 @@ namespace Lapidary.Converters.Temporary;
 
 internal sealed class OtherStringConverter : LapidaryClassConverter<string>
 {
-	public override IList<Oop> IdentifyingOops =>
+	public override IReadOnlyList<Oop> IdentifyingOops =>
 		[
 			ReservedOops.OOP_CLASS_DoubleByteString,
 			ReservedOops.OOP_CLASS_DoubleByteSymbol,
@@ -14,7 +14,7 @@ internal sealed class OtherStringConverter : LapidaryClassConverter<string>
 			ReservedOops.OOP_CLASS_Unicode32,
 		];
 
-	public override IList<string> IdentifyingSymbols => [];
+	public override IReadOnlyList<string> IdentifyingSymbols => [];
 
 	protected override ConversionResult<string> ConvertObject(GemObject gemObject)
 	{

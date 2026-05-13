@@ -1,4 +1,5 @@
 ﻿using Lapidary.Authentication;
+using Lapidary.Converters;
 
 namespace Lapidary.Configuration.Validation;
 
@@ -52,6 +53,40 @@ internal sealed class GemStoneConfigurationBuilderValidator
 		}
 
 		//Converters
+		foreach (var converter in builder.Converters)
+		{
+			if (!ValidateConverter(converter))
+			{
+				ThrowHelper.GenericExceptionToDetailLater();
+			}
+		}
+	}
+
+	private bool ValidateConverter(ILapidaryConverter converter)
+	{
+		// TODO: All oops valid, all symbols valid
+
+		if (converter.IdentifyingOops.Count == 0)
+		{
+			if (converter.IdentifyingSymbols.Count == 0)
+			{
+				return false;
+			}
+
+			foreach (var symbol in converter.IdentifyingSymbols)
+			{
+				// TODO: Validation
+				return false;
+			}
+		}
+
+		foreach (var oop in converter.IdentifyingOops)
+		{
+			// TODO: Validation
+			return false;
+		}
+
+		return true;
 	}
 
 	private bool ValidateGemStoneField(ReadOnlySpan<char> text)

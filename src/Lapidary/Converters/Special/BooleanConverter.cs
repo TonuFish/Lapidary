@@ -2,9 +2,9 @@
 
 internal sealed class BooleanConverter : LapidaryStructConverter<bool>
 {
-	public override IList<Oop> IdentifyingOops => [ReservedOops.OOP_FALSE, ReservedOops.OOP_TRUE];
+	public override IReadOnlyList<Oop> IdentifyingOops => [ReservedOops.OOP_FALSE, ReservedOops.OOP_TRUE,];
 
-	public override IList<string> IdentifyingSymbols => [];
+	public override IReadOnlyList<string> IdentifyingSymbols => [];
 
 	protected override ConversionResult<bool> ConvertObject(GemObject gemObject)
 	{

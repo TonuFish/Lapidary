@@ -2,9 +2,9 @@
 
 internal sealed class SmallDoubleConverter : LapidaryNumberConverter<double>
 {
-	public override IList<Oop> IdentifyingOops => [ReservedOops.OOP_TAG_SMALLDOUBLE];
+	public override IReadOnlyList<Oop> IdentifyingOops => [ReservedOops.OOP_TAG_SMALLDOUBLE,];
 
-	public override IList<string> IdentifyingSymbols => [];
+	public override IReadOnlyList<string> IdentifyingSymbols => [];
 
 	protected override ConversionResult<double> ConvertObject(GemObject gemObject)
 	{

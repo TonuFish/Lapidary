@@ -66,8 +66,8 @@ internal sealed class GemStoneState
 		try
 		{
 			ProcessConverters(session);
-		IsInitialised = true;
-	}
+			IsInitialised = true;
+		}
 		catch (Exception ex)
 		{
 			// TODO: Errors.
@@ -83,7 +83,7 @@ internal sealed class GemStoneState
 		if (!Logins.TryGetValue(identifier, out var data))
 		{
 			ThrowHelper.GenericExceptionToDetailLater();
-	}
+		}
 
 		return Login(data);
 	}
@@ -136,8 +136,8 @@ internal sealed class GemStoneState
 	{
 		if (_sessions.Remove(session))
 		{
-		FFI.Logout(session);
-	}
+			FFI.Logout(session);
+		}
 	}
 
 	#endregion Login code that should be somewhere else
@@ -166,16 +166,24 @@ internal sealed class GemStoneState
 			return;
 		}
 
-		if (UserDefinedConverters is null)
-		{
-			FinaliseConverters();
-			return;
-		}
-
 		Dictionary<ConverterKey, ILapidaryConverter> classConverters = [];
 		Dictionary<Oop, ILapidaryConverter> numberConverters = [];
 		Dictionary<ConverterKey, ILapidaryConverter> structConverters = [];
 
+		if (UserDefinedConverters is not null)
+		{
+			ProcessUserConverters(session, classConverters, numberConverters, structConverters);
+		}
+
+		FinaliseConverters(classConverters, numberConverters, structConverters);
+	}
+
+	private void ProcessUserConverters(
+		GemBuilderSession session,
+		Dictionary<ConverterKey, ILapidaryConverter>? classConverters = null,
+		Dictionary<Oop, ILapidaryConverter>? numberConverters = null,
+		Dictionary<ConverterKey, ILapidaryConverter>? structConverters = null)
+	{
 		foreach (var converter in UserDefinedConverters)
 		{
 			if (converter.IdentifyingOops.Count == 0 && converter.IdentifyingSymbols.Count == 0)
@@ -183,11 +191,11 @@ internal sealed class GemStoneState
 				ThrowHelper.GenericExceptionToDetailLater();
 			}
 
-			HashSet<Oop> targetOops = [.. converter.IdentifyingOops];
+			HashSet<Oop> targetOops = [.. converter.IdentifyingOops,];
 
 			foreach (var symbol in converter.IdentifyingSymbols)
 			{
-				targetOops.Add(FindSymbol(session, symbol.AsSpan()));
+				_ = targetOops.Add(FindSymbol(session, symbol.AsSpan()));
 			}
 
 			if (converter.CanConvertToClass)
@@ -223,8 +231,6 @@ internal sealed class GemStoneState
 				}
 			}
 		}
-
-		FinaliseConverters(classConverters, numberConverters, structConverters);
 	}
 
 	#region Default Converters (TO REFACTOR)
@@ -232,68 +238,58 @@ internal sealed class GemStoneState
 	// TODO: Quick hack job, do it properly.
 
 	private void FinaliseConverters(
-		Dictionary<ConverterKey, ILapidaryConverter>? classConverters = null,
-		Dictionary<Oop, ILapidaryConverter>? numberConverters = null,
-		Dictionary<ConverterKey, ILapidaryConverter>? structConverters = null)
+		Dictionary<ConverterKey, ILapidaryConverter> classConverters,
+		Dictionary<Oop, ILapidaryConverter> numberConverters,
+		Dictionary<ConverterKey, ILapidaryConverter> structConverters)
 	{
 		if (IsInitialised)
 		{
 			return;
 		}
 
-		classConverters ??= [];
-		numberConverters ??= [];
-		structConverters ??= [];
-
-		AddDefaultClassConverters(classConverters);
-		AddDefaultNumberConverters(numberConverters);
-		AddDefaultStructConverters(structConverters);
+		if (AddStandardConverters)
+		{
+			AddDefaultClassConverters(classConverters);
+			AddDefaultNumberConverters(numberConverters);
+			AddDefaultStructConverters(structConverters);
+		}
 
 		ClassConverters = classConverters.ToFrozenDictionary();
 		NumberConverters = numberConverters.ToFrozenDictionary();
 		StructConverters = structConverters.ToFrozenDictionary();
-
-		_validatingLogin = null;
-		IsInitialised = true;
 	}
 
 	private void AddDefaultClassConverters(Dictionary<ConverterKey, ILapidaryConverter> classConverters)
 	{
-		classConverters.EnsureCapacity(2);
-
-		StandardStringConverter a0 = new();
-		foreach (var oop in a0.IdentifyingOops)
-		{
-			classConverters.TryAdd(new(oop, a0.ConversionType), a0);
-		}
-
-		OtherStringConverter a1 = new();
-		foreach (var oop in a1.IdentifyingOops)
-		{
-			classConverters.TryAdd(new(oop, a1.ConversionType), a1);
-		}
+		AddConverter(new StandardStringConverter(), classConverters);
+		AddConverter(new OtherStringConverter(), classConverters);
 	}
 
 	private void AddDefaultNumberConverters(Dictionary<Oop, ILapidaryConverter> numberConverters)
 	{
-		numberConverters.EnsureCapacity(2);
+		AddNumberConverter(new IntegerConverter(), numberConverters);
+		AddNumberConverter(new FloatConverter(), numberConverters);
 
-		IntegerConverter a0 = new();
-		foreach (var oop in a0.IdentifyingOops)
+		static void AddNumberConverter(ILapidaryConverter converter, Dictionary<Oop, ILapidaryConverter> converters)
 		{
-			numberConverters.TryAdd(oop, a0);
-		}
-
-		FloatConverter a1 = new();
-		foreach (var oop in a1.IdentifyingOops)
-		{
-			numberConverters.TryAdd(oop, a1);
+			foreach (var oop in converter.IdentifyingOops)
+			{
+				_ = converters.TryAdd(oop, converter);
+			}
 		}
 	}
 
 	private void AddDefaultStructConverters(Dictionary<ConverterKey, ILapidaryConverter> structConverters)
 	{
 		// None.
+	}
+
+	private void AddConverter(ILapidaryConverter converter, Dictionary<ConverterKey, ILapidaryConverter> converters)
+	{
+		foreach (var oop in converter.IdentifyingOops)
+		{
+			_ = converters.TryAdd(new(oop, converter.ConversionType), converter);
+		}
 	}
 
 	#endregion Default Converters (TO REFACTOR)

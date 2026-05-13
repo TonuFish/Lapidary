@@ -2,9 +2,9 @@
 
 internal sealed class IntegerConverter : LapidaryNumberConverter<long>
 {
-	public override IList<Oop> IdentifyingOops => [ReservedOops.OOP_CLASS_LargeInteger];
+	public override IReadOnlyList<Oop> IdentifyingOops => [ReservedOops.OOP_CLASS_LargeInteger,];
 
-	public override IList<string> IdentifyingSymbols => Array.Empty<string>();
+	public override IReadOnlyList<string> IdentifyingSymbols => [];
 
 	protected override ConversionResult<long> ConvertObject(GemObject gemObject)
 	{

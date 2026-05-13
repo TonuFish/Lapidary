@@ -10,9 +10,9 @@ public abstract class LapidaryClassConverter<T> : ILapidaryConverter where T : c
 
 	public bool CanConvertToStruct => false;
 
-	public abstract IList<Oop> IdentifyingOops { get; }
+	public abstract IReadOnlyList<Oop> IdentifyingOops { get; }
 
-	public abstract IList<string> IdentifyingSymbols { get; }
+	public abstract IReadOnlyList<string> IdentifyingSymbols { get; }
 
 	public Type ConversionType => typeof(T);
 

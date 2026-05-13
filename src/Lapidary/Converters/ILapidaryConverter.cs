@@ -12,9 +12,9 @@ public interface ILapidaryConverter
 
 	public Type ConversionType { get; }
 
-	public IList<Oop> IdentifyingOops { get; }
+	public IReadOnlyList<Oop> IdentifyingOops { get; }
 
-	public IList<string> IdentifyingSymbols { get; }
+	public IReadOnlyList<string> IdentifyingSymbols { get; }
 
 	public TTo ConvertToClass<TTo>(GemObject gemObject) where TTo : class;
 

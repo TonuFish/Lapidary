@@ -4,9 +4,13 @@ namespace Lapidary.Converters.Temporary;
 
 internal sealed class StandardStringConverter : LapidaryClassConverter<string>
 {
-	public override IList<Oop> IdentifyingOops => [ReservedOops.OOP_CLASS_STRING, ReservedOops.OOP_CLASS_SYMBOL];
+	public override IReadOnlyList<Oop> IdentifyingOops =>
+		[
+			ReservedOops.OOP_CLASS_STRING,
+			ReservedOops.OOP_CLASS_SYMBOL,
+		];
 
-	public override IList<string> IdentifyingSymbols => Array.Empty<string>();
+	public override IReadOnlyList<string> IdentifyingSymbols => [];
 
 	protected override ConversionResult<string> ConvertObject(GemObject gemObject)
 	{

@@ -68,13 +68,13 @@ internal static class ReworkExample
 		var context = gemStone.GetContext(new("foo"));
 
 		// Use your connection.
-		var aObject = context.PerformSmalltalkRaw("72"u8);
-		var bObject = context.PerformSmalltalkRaw("43"u8);
+		var aObject = context.PerformSmalltalkRaw("72.4"u8);
+		var bObject = context.PerformSmalltalkRaw("43.5"u8);
 		var result = aObject.Perform("+"u8, bObject);
 
 		// Read some objects.
 		var resultAsText = result.Perform("printString"u8).GetString();
-		var resultAsNumber = result.GetNumber<int>();
+		var resultAsNumber = result.GetNumber<double>();
 	}
 }
 
@@ -87,9 +87,9 @@ public sealed class FooGemStone : GemStone<FooGemStone>
 
 public sealed class FooHalfConverter : LapidaryNumberConverter<Half>
 {
-	public override IList<ulong> IdentifyingOops => [];
+	public override IReadOnlyList<ulong> IdentifyingOops => [];
 
-	public override IList<string> IdentifyingSymbols => ["Half",];
+	public override IReadOnlyList<string> IdentifyingSymbols => ["Half",];
 
 	protected override ConversionResult<Half> ConvertObject(GemObject gemObject)
 	{
